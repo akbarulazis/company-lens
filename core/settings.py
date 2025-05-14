@@ -43,7 +43,15 @@ INSTALLED_APPS = [
     "whitenoise.runserver_nostatic",
     'django.contrib.staticfiles',
     "huey.contrib.djhuey",
-    "apps"
+    "apps.example",
+    "apps.chatbot",
+    "apps.charts",
+    "apps.companies",
+    "apps.prompt",
+    "apps.reports",
+    "apps.scores",
+    "apps.users",
+    "apps.workspaces",
 ]
 
 MIDDLEWARE = [
@@ -62,7 +70,7 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

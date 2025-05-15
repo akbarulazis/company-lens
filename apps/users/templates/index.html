@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Company Researcher</title>
+  <link href="{% static 'output.css' %}" rel="stylesheet" />
+  <!-- Add Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body class="h-screen w-full bg-gray-50">
+  <div class="container mx-auto px-4 py-8 max-w-6xl">
+    <div class="bg-white rounded-lg shadow-md p-8 mb-8 text-center">
+      <h1 class="text-4xl font-bold mb-3 text-blue-600">Company Researcher</h1>
+      <p class="text-xl text-gray-600 mb-6">AI-powered investment research and analysis platform</p>
+
+      <div class="mt-6">
+        <a href="#" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg inline-flex items-center">
+          <i class="fas fa-sign-in-alt mr-2"></i>Login
+        </a>
+      </div>
+      <p class="text-gray-500 mt-3 text-sm">Login required to access workspaces</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 text-center">
+        <i class="fas fa-chart-pie text-blue-500 text-4xl mb-4"></i>
+        <h5 class="text-xl font-semibold mb-2">Investment Scoring</h5>
+        <p class="text-gray-600">Get AI-powered investment scores (1-5) for any company based on financial health, risk, growth potential, and more.</p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 text-center">
+        <i class="fas fa-exchange-alt text-blue-500 text-4xl mb-4"></i>
+        <h5 class="text-xl font-semibold mb-2">Company Comparison</h5>
+        <p class="text-gray-600">Compare up to 3 companies side-by-side with detailed insights to make better investment decisions.</p>
+      </div>
+
+      <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6 text-center">
+        <i class="fas fa-file-alt text-blue-500 text-4xl mb-4"></i>
+        <h5 class="text-xl font-semibold mb-2">Document Analysis</h5>
+        <p class="text-gray-600">Upload company documents for AI analysis to extract key metrics, risks, and growth opportunities.</p>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow-sm p-6">
+      <h4 class="text-xl font-semibold mb-4 text-center text-blue-600   ">Start Your Research</h4>
+      <div class="bg-blue-50 text-blue-700 p-4 rounded-lg text-center">
+        <i class="fas fa-info-circle mr-2"></i>Please login to begin researching companies
+      </div>
+    </div>
+  </div>
+</body>
+</html>

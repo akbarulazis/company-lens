@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link href="{% static 'output.css' %}" rel="stylesheet" />
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <div class="bg-white rounded-lg shadow-md p-8 mb-8 text-center">
+            <h1 class="text-4xl font-bold mb-3 text-blue-600">Create Account</h1>
+            <p class="text-xl text-gray-600 mb-6">Join our platform to access all features</p>
+
+            <form method='post' class="max-w-md mx-auto">
+                {% csrf_token %}
+                <div class="mb-4">
+                    <div class="flex items-center border border-gray-300 rounded-lg px-3 py-2 mb-4">
+                        <i class=" text-gray-400 mr-2"></i>
+                        <input name="username" placeholder="Username" required
+                               class="w-full outline-none text-gray-700"/>
+                    </div>
+
+                    <div class="flex items-center border border-gray-300 rounded-lg px-3 py-2 mb-4">
+                        <i class="text-gray-400 mr-2"></i>
+                        <input name="email" placeholder="Email" type='email' required
+                               class="w-full outline-none text-gray-700"/>
+                    </div>
+
+                                        <div class="flex items-center border border-gray-300 rounded-lg px-3 py-2 mb-4">
+                        <i class=" text-gray-400 mr-2"></i>
+                        <input name="firstname" placeholder="First Name"  required
+                               class="w-full outline-none text-gray-700"/>
+                    </div>
+
+                                                            <div class="flex items-center border border-gray-300 rounded-lg px-3 py-2 mb-4">
+                        <i class=" text-gray-400 mr-2"></i>
+                        <input name="lastname" placeholder="Last Name"  required
+                               class="w-full outline-none text-gray-700"/>
+                    </div>
+
+
+
+                    <div class="flex items-center border border-gray-300 rounded-lg px-3 py-2 mb-6">
+                        <i class="fas fa-lock text-gray-400 mr-2"></i>
+                        <input name="password" placeholder="Password" type='password' required
+                               class="w-full outline-none text-gray-700"/>
+                    </div>
+                </div>
+
+                <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg inline-flex items-center w-full justify-center">
+                    <i class="mr-2"></i>Register
+                </button>
+            </form>
+
+            <p class="text-gray-500 mt-4 text-sm">Already have an account? <a href="{%url 'login'%}" class="text-blue-600 hover:underline">Login here</a></p>
+        </div>
+
+    </div>
+</body>
+</html>

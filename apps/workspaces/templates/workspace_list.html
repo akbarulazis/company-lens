@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">My Workspaces</h1>
+    <a href="{% url 'workspace_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg inline-flex items-center">
+      <i class="fas fa-plus mr-2"></i>New Workspace
+    </a>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="mb-4 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {% if workspaces %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {% for workspace in workspaces %}
+        <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6">
+          <div class="flex justify-between items-start mb-4">
+            <h3 class="text-xl font-semibold text-gray-800">{{ workspace.name }}</h3>
+            <div class="dropdown relative">
+              <button class="text-gray-500 hover:text-gray-700 focus:outline-none">
+                <i class="fas fa-ellipsis-v"></i>
+              </button>
+              <div class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg hidden z-10">
+                <a href="{% url 'workspace_update' workspace.id %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                  <i class="fas fa-edit mr-2"></i>Edit
+                </a>
+                <a href="{% url 'workspace_delete' workspace.id %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                  <i class="fas fa-trash mr-2"></i>Delete
+                </a>
+              </div>
+            </div>
+          </div>
+          
+          {% if workspace.description %}
+            <p class="text-gray-600 mb-4">{{ workspace.description }}</p>
+          {% else %}
+            <p class="text-gray-500 italic mb-4">No description</p>
+          {% endif %}
+          
+          <div class="flex justify-between items-center text-sm text-gray-500">
+            <span><i class="far fa-calendar-alt mr-1"></i>{{ workspace.created_at|date:"M d, Y" }}</span>
+            <a href="{% url 'workspace_detail' workspace.id %}" class="text-blue-600 hover:text-blue-800 font-medium">
+              View Details <i class="fas fa-arrow-right ml-1"></i>
+            </a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="bg-white rounded-lg shadow-sm p-8 text-center">
+      <i class="fas fa-folder-open text-gray-400 text-5xl mb-4"></i>
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">No workspaces yet</h3>
+      <p class="text-gray-600 mb-6">Create your first workspace to start organizing your research</p>
+      <a href="{% url 'workspace_create' %}" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg inline-flex items-center">
+        <i class="fas fa-plus mr-2"></i>Create Workspace
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+<script>
+  // Simple dropdown toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    const dropdownButtons = document.querySelectorAll('.dropdown button');
+    
+    dropdownButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const menu = this.nextElementSibling;
+        menu.classList.toggle('hidden');
+      });
+    });
+    
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+      if (!event.target.closest('.dropdown')) {
+        document.querySelectorAll('.dropdown-menu').forEach(menu => {
+          menu.classList.add('hidden');
+        });
+      }
+    });
+  });
+</script>
+{% endblock content %} 

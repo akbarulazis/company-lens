@@ -1,16 +1,6 @@
-<!DOCTYPE html>
-{% load static %}
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Company Researcher</title>
-  <link href="{% static 'output.css' %}" rel="stylesheet" />
-  <!-- Add Font Awesome for icons -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+{% extends "base.html" %}
 
-<body class="bg-gray-50">
+{% block content %}
   <div class="container mx-auto px-4 py-8 max-w-6xl">
     <div class="bg-white rounded-lg shadow-md p-8 mb-8 text-center">
       <h1 class="text-4xl font-bold mb-3 text-blue-600">Company Researcher</h1>
@@ -29,7 +19,7 @@
         </a>
       </div>
         <p class="text-muted mt-2">Register required to access workspaces</p>
-       <p class="text-gray-500 mt-4 text-sm">Already have an account? <a href="{%url 'login'%}" class="text-blue-600 hover:underline">Login here</a></p>
+      <p class="text-gray-500 mt-4 text-sm">Already have an account? <a href="{%url 'login'%}" class="text-blue-600 hover:underline">Login here</a></p>
       {% endif %}
     </div>
 
@@ -60,5 +50,4 @@
       </div>
     </div>
   </div>
-</body>
-</html>
+{% endblock content %}

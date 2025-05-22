@@ -60,27 +60,85 @@ def research(query: str) -> str:
             print('NO RESPONSE')
             return "No results found from Tavily search."
 
-        # Extract main URL and validate
-        print('MASUK')
-        print(tavily_response)
-        main_url = tavily_response.get('url')
-        if not main_url:
-            return "No main URL found in Tavily response."
-
-        # Extract main company information
-        main_info = extract_main_info(main_url)
-        if not main_info:
-            return "Failed to extract main company information."
-
-        # Initialize URL validator
-        url_validator = URLValidator(main_info)
-
-        # Crawl main URL
-        crawled_urls = url_crawler.crawl(main_url)
-        valid_urls = [url for url in crawled_urls if url_validator.is_valid_company_url(url)]
-
-        # Generate business queries
-        query_generator = BusinessQueryGenerator(main_info['name'])
+        # Process tavily_response based on its structure
+        print('TAVILY RESPONSE RECEIVED')
+        
+        main_info = {}
+        valid_urls = []
+        
+        if isinstance(tavily_response, dict):
+            # Handle error responses
+            if 'error' in tavily_response:
+                return f"Error from Tavily search: {tavily_response['error']}"
+            
+            # Extract main company info
+            if 'main_company_info' in tavily_response:
+                main_info = tavily_response['main_company_info']
+                
+            # Extract valid URLs
+            if 'valid_urls' in tavily_response and tavily_response['valid_urls']:
+                valid_urls = tavily_response['valid_urls']
+                
+                # Extract main URL from valid URLs
+                main_url = None
+                for url in valid_urls:
+                    if 'linkedin.com' not in url.lower() and 'twitter.com' not in url.lower() and 'facebook.com' not in url.lower():
+                        main_url = url
+                        break
+                
+                if not main_url and valid_urls:
+                    main_url = valid_urls[0]
+                    
+                # If we have a main URL, extract additional info from it
+                if main_url:
+                    additional_info = extract_main_info(main_url)
+                    if additional_info:
+                        # Merge additional info with main_info
+                        for key, value in additional_info.items():
+                            if key not in main_info or not main_info[key]:
+                                main_info[key] = value
+            
+            # Add company name to main_info if not present
+            if 'name' not in main_info or not main_info['name']:
+                main_info['name'] = query
+                
+            # Extract data from business_analysis if available
+            business_analysis = tavily_response.get('business_analysis', {})
+            
+            # Add industry from business_analysis if not in main_info
+            if business_analysis and ('industry' not in main_info or not main_info.get('industry')):
+                # Try to extract industry from business_analysis
+                text = str(business_analysis)
+                lower_text = text.lower()
+                
+                # Check for industry mentions
+                industry_indicators = [
+                    "industry", "sector", "field", "market"
+                ]
+                
+                for indicator in industry_indicators:
+                    if indicator in lower_text:
+                        # Find the sentence containing this indicator
+                        idx = lower_text.find(indicator)
+                        start = max(0, lower_text.rfind('.', 0, idx) + 1)
+                        end = lower_text.find('.', idx)
+                        if end == -1:
+                            end = len(lower_text)
+                        
+                        industry_sentence = text[start:end].strip()
+                        # Add to main_info
+                        main_info['industry'] = industry_sentence
+                        break
+        else:
+            # Invalid response format
+            return "Invalid response format from Tavily search."
+            
+        # Generate additional business queries
+        if 'name' in main_info:
+            query_generator = BusinessQueryGenerator(main_info['name'])
+        else:
+            query_generator = BusinessQueryGenerator(query)
+            
         business_queries = query_generator.generate_queries()
 
         # Search for each business query
@@ -89,6 +147,12 @@ def research(query: str) -> str:
             search_results = get_tavily_response(business_query)
             if search_results:
                 all_results.append(search_results)
+                
+                # Try to extract additional info from these results
+                if isinstance(search_results, dict) and 'main_company_info' in search_results:
+                    for key, value in search_results['main_company_info'].items():
+                        if key not in main_info or not main_info[key]:
+                            main_info[key] = value
 
         # Aggregate results
         context = f"Main Company Information:\n{json.dumps(main_info, indent=2)}\n\n"

@@ -48,19 +48,49 @@ def process_research(workspace_id, company_name):
         send_notification("notification", "Generating business profile...")
         business_profile = generate_business_profile(research_results, company_name)
 
-        # Save the profile to the database
+        # Extract possible company website
+        company_website = None
+        if 'Website URL' in main_info:
+            company_website = main_info.get('Website URL')
+        elif valid_urls:
+            # Use first URL as company website if no specific website URL found
+            for url in valid_urls:
+                if company_name.lower() in url.lower() and not url.startswith(('https://linkedin.com', 'https://twitter.com')):
+                    company_website = url
+                    break
+            if not company_website and valid_urls:
+                company_website = valid_urls[0]
+
+        # Create company object with more details
+        company_obj = Company.objects.create(
+            name=company_name,
+            ticker=main_info.get('Ticker Symbol') or main_info.get('stock_symbol'),
+            description=main_info.get('Description')
+        )
+
+        # Save the profile to the database with enriched information
         profile = CompanyProfile(
             workspace=workspace,
+            company=company_obj,
             company_name=company_name,
-            industry=main_info.get('industry'),
-            profile_content=business_profile
+            industry=main_info.get('industry') or main_info.get('Industry'),
+            profile_content=business_profile,
+            headquarters=main_info.get('Location') or main_info.get('Headquarters'),
+            founded_year=main_info.get('Founded') or main_info.get('Year Founded'),
+            employee_count=main_info.get('Employees') or main_info.get('Employee Count'),
+            company_website=company_website
         )
+        
+        # If there are LinkedIn or Crunchbase URLs, save them
+        for url in valid_urls:
+            if 'linkedin.com' in url.lower():
+                profile.linkedin_url = url
+            elif 'crunchbase.com' in url.lower():
+                profile.crunchbase_url = url
+                
         profile.save()
 
-        com_name = Company.objects.create( name=company_name)
-        WorkspaceCompany.objects.create(workspace=workspace, company=com_name)
-
-
+        WorkspaceCompany.objects.create(workspace=workspace, company=company_obj)
 
         # Calculate investment scores
         calculate_company_scores(profile.id)

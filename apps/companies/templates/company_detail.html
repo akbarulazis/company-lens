@@ -177,8 +177,6 @@
             {% endif %}
         </div>
 
-
-
 <!-- Company Profile Content -->
 <div class="bg-white rounded-lg shadow-md p-6 mb-8">
     <h2 class="text-2xl font-semibold mb-6 text-gray-800">Company Profile</h2>
@@ -191,33 +189,23 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
                 <div>
-                    <p class="mb-2"><span class="font-medium">Full Legal Name:</span> {{ profile.legal_name|default:"PT Bank Central Asia Tbk." }}</p>
-                    <p class="mb-2"><span class="font-medium">Headquarters:</span> {{ profile.headquarters|default:"Jakarta, Indonesia" }}</p>
-                    <p class="mb-2"><span class="font-medium">Year Founded:</span> {{ profile.year_founded|default:"1957" }}</p>
-                    <p class="mb-2"><span class="font-medium">Ticker Symbol:</span> {{ profile.ticker|default:"BBCA" }}</p>
+                            <p class="mb-2"><span class="font-medium">Full Legal Name:</span> {{ profile.company_name }}</p>
+                            <p class="mb-2"><span class="font-medium">Headquarters:</span> {{ profile.headquarters|default:"Not specified" }}</p>
+                            <p class="mb-2"><span class="font-medium">Year Founded:</span> {{ profile.founded_year|default:"Not specified" }}</p>
+                            <p class="mb-2"><span class="font-medium">Ticker Symbol:</span> {{ profile.stock_symbol|default:"Not listed" }}</p>
                 </div>
                 <div>
-                    <p class="mb-2"><span class="font-medium">Industry:</span> {{ profile.industry|default:"Banking" }}</p>
-                    <p class="mb-2"><span class="font-medium">Employees:</span> {{ profile.employees|default:"Approximately 30,000" }}</p>
-                    <p class="mb-2"><span class="font-medium">Locations:</span> {{ profile.locations|default:"Over 1,200 branches across Indonesia" }}</p>
-                    <p class="mb-2"><span class="font-medium">Status:</span> {{ profile.company_status|default:"Public company, listed on Indonesia Stock Exchange" }}</p>
+                            <p class="mb-2"><span class="font-medium">Industry:</span> {{ profile.industry|default:"Not specified" }}</p>
+                            <p class="mb-2"><span class="font-medium">Employees:</span> {{ profile.employee_count|default:"Not specified" }}</p>
+                            <p class="mb-2"><span class="font-medium">Website:</span> {% if profile.company_website %}<a href="{{ profile.company_website }}" target="_blank" class="text-blue-600 hover:underline">{{ profile.company_website }}</a>{% else %}Not specified{% endif %}</p>
+                            <p class="mb-2"><span class="font-medium">Status:</span> {% if profile.stock_symbol %}Public company{% else %}Not specified{% endif %}</p>
                 </div>
             </div>
 
             <div class="mt-4">
-                <p class="font-medium mb-2">Brief Company History:</p>
+                        <p class="font-medium mb-2">Company Description:</p>
                 <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
-                    <p class="mb-2">Founded by a group of Indonesian entrepreneurs, BCA initially operated as a small bank in Jakarta.</p>
-                    <p class="mb-2">Key milestones include the establishment of multiple branches across Indonesia throughout the 1980s and 1990s, marking its expansion in the national market.</p>
-                    <p class="mb-2">Became a publicly-listed company on the Jakarta Stock Exchange in 2000, further solidifying its presence and capital base.</p>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <p class="font-medium mb-2">Primary Business Activities:</p>
-                <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
-                    <p>Provides a comprehensive range of banking services including retail banking, corporate banking, treasury services, and investment banking.</p>
-                    <p>Classified under the Banking sector (Industry Classification: NACE code 6419).</p>
+                            <p class="mb-2">{% if profile.company and profile.company.description %}{{ profile.company.description }}{% else %}No detailed description available.{% endif %}</p>
                 </div>
             </div>
         </div>
@@ -229,52 +217,108 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                 <!-- Revenue Card -->
                 <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Revenue (2022)</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 106 trillion</p>
+                            <h4 class="font-medium text-gray-800 mb-2">Revenue</h4>
+                            <p class="text-3xl font-bold text-blue-700 mb-1">{{ profile.annual_revenue|default:"Not available" }}</p>
                     <p class="text-sm text-gray-600">
+                                {% if profile.annual_revenue %}
                         <span class="inline-flex items-center text-green-600">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
                             </svg>
-                            5% increase
+                                    Based on available data
                         </span>
-                        from IDR 101 trillion in 2021
+                                {% endif %}
                     </p>
                 </div>
 
-                <!-- Profit Card -->
+                        <!-- Market Cap Card -->
                 <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Net Profit (2022)</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 38 trillion</p>
-                    <p class="text-sm text-gray-600">Profit margin: <span class="font-semibold">36%</span></p>
+                            <h4 class="font-medium text-gray-800 mb-2">Market Cap</h4>
+                            <p class="text-3xl font-bold text-blue-700 mb-1">{{ profile.market_cap|default:"Not available" }}</p>
+                            <p class="text-sm text-gray-600">{% if profile.market_cap %}Current valuation{% endif %}</p>
                 </div>
 
-                <!-- Assets Card -->
+                        <!-- Funding Card -->
                 <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Total Assets</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 1,200 trillion</p>
-                    <p class="text-sm text-gray-600">As of 2022</p>
+                            <h4 class="font-medium text-gray-800 mb-2">Funding Total</h4>
+                            <p class="text-3xl font-bold text-blue-700 mb-1">{{ profile.funding_total|default:"Not available" }}</p>
+                            <p class="text-sm text-gray-600">{% if profile.funding_total %}Total investment raised{% endif %}</p>
                 </div>
 
-                <!-- Equity Card -->
+                        <!-- External Links Card -->
                 <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Total Equity</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 150 trillion</p>
-                    <p class="text-sm text-gray-600">Liabilities: IDR 1,050 trillion</p>
+                            <h4 class="font-medium text-gray-800 mb-2">External Links</h4>
+                            <div class="space-y-2">
+                                {% if profile.company_website %}
+                                <p><a href="{{ profile.company_website }}" target="_blank" class="text-blue-600 hover:underline flex items-center"><i class="fas fa-globe mr-2"></i>Website</a></p>
+                                {% endif %}
+                                {% if profile.linkedin_url %}
+                                <p><a href="{{ profile.linkedin_url }}" target="_blank" class="text-blue-600 hover:underline flex items-center"><i class="fab fa-linkedin mr-2"></i>LinkedIn</a></p>
+                                {% endif %}
+                                {% if profile.crunchbase_url %}
+                                <p><a href="{{ profile.crunchbase_url }}" target="_blank" class="text-blue-600 hover:underline flex items-center"><i class="fas fa-database mr-2"></i>Crunchbase</a></p>
+                                {% endif %}
+                                {% if not profile.linkedin_url and not profile.crunchbase_url and not profile.company_website %}
+                                <p class="text-gray-500">No external links available</p>
+                                {% endif %}
+                            </div>
                 </div>
             </div>
 
+                    {% if profile.financial_health_insight %}
             <div class="mt-6 bg-blue-50 rounded-lg p-4">
-                <h4 class="font-medium text-gray-800 mb-2">Key Financial Metrics:</h4>
-                <ul class="list-disc pl-5 space-y-1 text-gray-700">
-                    <li>ROE: <span class="font-semibold">25.9%</span></li>
-                    <li>Debt-to-Equity Ratio: <span class="font-semibold">7.0</span></li>
-                    <li>NPL Ratio: <span class="font-semibold">2.1%</span></li>
-                    <li>Gross Profit: <span class="font-semibold">IDR 66 trillion</span></li>
-                    <li>Operating Profit: <span class="font-semibold">IDR 52 trillion</span></li>
-                </ul>
+                        <h4 class="font-medium text-gray-800 mb-2">Financial Health Insights:</h4>
+                        <div class="text-gray-700">
+                            {{ profile.financial_health_insight }}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {% if profile.business_risk_insight or profile.growth_potential_insight or profile.industry_position_insight %}
+                <!-- Business Analysis Section -->
+                <div>
+                    <h3 class="text-xl font-semibold text-blue-600 border-b border-gray-200 pb-2 mb-4">3. BUSINESS ANALYSIS</h3>
+
+                    <div class="grid grid-cols-1 gap-6">
+                        {% if profile.business_risk_insight %}
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3">Business Risk Assessment</h4>
+                            <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
+                                {{ profile.business_risk_insight }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if profile.growth_potential_insight %}
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3">Growth Potential</h4>
+                            <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
+                                {{ profile.growth_potential_insight }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if profile.industry_position_insight %}
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3">Industry Position</h4>
+                            <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
+                                {{ profile.industry_position_insight }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if profile.external_trends_insight %}
+                        <div class="bg-gray-50 rounded-lg p-5">
+                            <h4 class="text-lg font-semibold text-gray-800 mb-3">External Trends & Market Factors</h4>
+                            <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
+                                {{ profile.external_trends_insight }}
+                            </div>
+                        </div>
+                        {% endif %}
             </div>
         </div>
+                {% endif %}
 
         <!-- Additional Sections -->
         <div class="prose prose-blue max-w-none">
@@ -444,5 +488,6 @@
             });
         });
     </script>
+    </div>
 </body>
 </html>

@@ -9,6 +9,6 @@ class WorkspaceAdmin(admin.ModelAdmin):
 
 @admin.register(WorkspaceCompany)
 class WorkspaceCompanyAdmin(admin.ModelAdmin):
-    list_display = ('workspace', 'company', 'added_at')
+    list_display = ('workspace', 'company', 'created_at')
     search_fields = ('workspace__name', 'company__name')
-    list_filter = ('added_at',)
+    list_filter = ('created_at',)

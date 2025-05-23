@@ -11,10 +11,13 @@ class Workspace(models.Model):
     def __str__(self):
         return self.name
 
+    def get_companies_count(self):
+        return self.companies.count()
+
 class WorkspaceCompany(models.Model):
     workspace = models.ForeignKey('Workspace', on_delete=models.CASCADE)
     company = models.ForeignKey('companies.Company', on_delete=models.CASCADE)
-    added_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('workspace', 'company')

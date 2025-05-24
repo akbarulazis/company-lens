@@ -1,6 +1,5 @@
 import json
 import logging
-import traceback
 from core.openai_client import openai_with_retry
 from apps.compare.prompts import COMPANY_COMPARISON_SYSTEM_PROMPT, COMPANY_COMPARISON_USER_PROMPT
 
@@ -9,62 +8,79 @@ logger = logging.getLogger(__name__)
 def generate_comparison_with_openai(companies_data):
     """Generate a comparison analysis using OpenAI"""
     try:
-        # Create a prompt for the OpenAI model
+        # Create company names for title
+        company_names = [company["name"] for company in companies_data]
+        if len(company_names) == 2:
+            title_text = f"Company Comparison: {company_names[0]} vs {company_names[1]}"
+        else:
+            title_text = f"Company Comparison: {', '.join(company_names[:-1])} and {company_names[-1]}"
+        
+        # Create prompt with company data
         system_prompt = COMPANY_COMPARISON_SYSTEM_PROMPT + json.dumps(companies_data, indent=2)
         
-        # Call the OpenAI API
+        # Call OpenAI API
         response = openai_with_retry(
             model="gpt-4o-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": COMPANY_COMPARISON_USER_PROMPT}
             ],
-            temperature=0.7,
-            max_tokens=3000,
+            temperature=0.3,
+            max_tokens=4000,
         )
         
-        # Extract the generated content
-        comparison_html = response.choices[0].message.content
+        # Get and clean the response
+        comparison_html = response.choices[0].message.content.strip()
         
-        # Make sure it's properly formatted as HTML
-        if not (comparison_html.strip().startswith('<') and comparison_html.strip().endswith('>')):
-            comparison_html = f"<div class='comparison-content'>{comparison_html}</div>"
+        # Remove markdown code blocks if present
+        if comparison_html.startswith("```html"):
+            comparison_html = comparison_html[7:]
+        if comparison_html.endswith("```"):
+            comparison_html = comparison_html[:-3]
         
-        return comparison_html
+        # Add title if not present
+        if "<h1" not in comparison_html.lower():
+            comparison_html = f"<h1>{title_text}</h1>\n{comparison_html}"
+            
+        return comparison_html.strip()
     
     except Exception as e:
-        logger.error(f"Error in OpenAI comparison generation: {str(e)}")
-        logger.error(traceback.format_exc())
-        # Return a simple comparison table as fallback
-        fallback_html = "<div class='p-4 mb-4 text-red-700 bg-red-100 rounded-lg'>"
-        fallback_html += "<h3 class='text-lg font-medium'>AI Comparison Failed</h3>"
-        fallback_html += f"<p>We couldn't generate an AI comparison: {str(e)}</p>"
-        fallback_html += "<p>Showing basic comparison data instead. You may try again or contact support if this issue persists.</p></div>"
+        logger.error(f"Error generating comparison: {str(e)}")
         
-        # Add a basic comparison table
-        fallback_html += "<table class='w-full border-collapse'>"
-        fallback_html += "<thead><tr><th class='border p-2'>Aspect</th>"
+        # Simple fallback
+        company_names = [company["name"] for company in companies_data]
+        title = f"Company Comparison: {' vs '.join(company_names)}"
         
-        # Add company names to header
-        for company in companies_data:
-            fallback_html += f"<th class='border p-2'>{company['name']}</th>"
-        fallback_html += "</tr></thead><tbody>"
+        fallback_html = f"""
+        <h1>{title}</h1>
+        <div class="error-message">
+            <h3>Comparison Generation Failed</h3>
+            <p>Unable to generate AI comparison. Please try again.</p>
+        </div>
         
-        # Add rows for different aspects
-        aspects = [
-            ('overall_score', 'Overall Score'),
-            ('financial_health_score', 'Financial Health'),
-            ('business_risk_score', 'Business Risk'),
-            ('growth_potential_score', 'Growth Potential'),
-            ('industry_position_score', 'Industry Position'),
-            ('external_trends_score', 'External Trends')
-        ]
+        <h2>Basic Comparison</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    {''.join(f'<th>{company["name"]}</th>' for company in companies_data)}
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Overall Score</td>
+                    {''.join(f'<td>{company["overall_score"]}</td>' for company in companies_data)}
+                </tr>
+                <tr>
+                    <td>Financial Health</td>
+                    {''.join(f'<td>{company["financial_health_score"]}</td>' for company in companies_data)}
+                </tr>
+                <tr>
+                    <td>Growth Potential</td>
+                    {''.join(f'<td>{company["growth_potential_score"]}</td>' for company in companies_data)}
+                </tr>
+            </tbody>
+        </table>
+        """
         
-        for key, label in aspects:
-            fallback_html += f"<tr><td class='border p-2 font-medium'>{label}</td>"
-            for company in companies_data:
-                fallback_html += f"<td class='border p-2'>{company[key]}</td>"
-            fallback_html += "</tr>"
-        
-        fallback_html += "</tbody></table>"
         return fallback_html

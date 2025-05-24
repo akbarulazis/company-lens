@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot | Company Researcher</title>
+    <link href="{% static 'output.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom animations for typing indicator */
+        @keyframes wave {
+            0%, 60%, 100% { transform: initial; }
+            30% { transform: translateY(-5px); }
+        }
+        .dot-animation {
+            animation: wave 1.3s linear infinite;
+        }
+        .dot-delay-1 {
+            animation-delay: -1.1s;
+        }
+        .dot-delay-2 {
+            animation-delay: -0.9s;
+        }
+
+        /* Custom scrollbar for chat messages */
+        .chat-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .chat-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+                <h1 class="text-4xl font-bold mb-2 text-blue-600">Company Assistant</h1>
+                <p class="text-gray-600">Ask questions about your companies in workspace "{{ workspace.name }}"</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a href="{% url 'workspace_detail' workspace.id %}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Workspace
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Main Chat Area -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-md">
+                    <div class="flex flex-col h-[calc(100vh-240px)]">
+                        <!-- Chat Messages Area -->
+                        <div class="flex-1 overflow-y-auto p-6 bg-gray-50 chat-scroll" id="chat-messages">
+                            {% if chat_history %}
+                                {% for message in chat_history %}
+                                    <div class="mb-4 flex {% if message.is_user_message %}justify-end{% else %}justify-start{% endif %}">
+                                        <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-lg {% if message.is_user_message %}bg-blue-600 text-white rounded-br-none{% else %}bg-white text-gray-800 rounded-bl-none shadow-sm border{% endif %}">
+                                            {{ message.message }}
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="mb-4 flex justify-start">
+                                    <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-white text-gray-800 rounded-bl-none shadow-sm border">
+                                        <div class="flex items-center mb-2">
+                                            <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                            <span class="text-sm font-medium text-gray-500">Assistant</span>
+                                        </div>
+                                        <p>Hello! I'm your company research assistant. I can help answer questions about your companies. What would you like to know?</p>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            <!-- Typing Indicator -->
+                            <div class="mb-4 flex justify-start hidden" id="typing-indicator">
+                                <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-lg bg-white text-gray-500 rounded-bl-none shadow-sm border">
+                                    <div class="flex items-center">
+                                        <span class="mr-2 text-sm">Assistant is typing</span>
+                                        <div class="flex space-x-1">
+                                            <div class="w-2 h-2 bg-gray-400 rounded-full dot-animation"></div>
+                                            <div class="w-2 h-2 bg-gray-400 rounded-full dot-animation dot-delay-1"></div>
+                                            <div class="w-2 h-2 bg-gray-400 rounded-full dot-animation dot-delay-2"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat Input Area -->
+                        <div class="p-6 bg-white border-t border-gray-100 rounded-b-lg">
+                            <div class="flex space-x-3">
+                                <input type="text" id="chat-input"
+                                       class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       placeholder="Ask a question about your companies...">
+                                <button id="send-button"
+                                        class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+
+                            <!-- Suggestions -->
+                            <div class="mt-4">
+                                <p class="text-sm text-gray-500 mb-3">Suggested questions:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
+                                        What are the key risks for these companies?
+                                    </button>
+                                    <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
+                                        Which company has the best growth potential?
+                                    </button>
+                                    <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
+                                        Compare the financial health of these companies.
+                                    </button>
+                                    <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
+                                        What are the recent market trends affecting these companies?
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Companies Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-md sticky top-6">
+                    <div class="px-6 py-4 border-b border-gray-100">
+                        <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                            <i class="fas fa-building mr-2 text-blue-600"></i>
+                            Companies
+                        </h3>
+                    </div>
+                    <div class="p-4 space-y-3 max-h-96 overflow-y-auto">
+                        {% if companies %}
+                            {% for company in companies %}
+                                <div class="p-3 border border-gray-200 rounded-lg cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-all duration-200 company-card" onclick="askAboutCompany('{{ company.company_name }}')">
+                                    <h4 class="font-medium text-gray-800 text-sm">{{ company.company_name }}</h4>
+                                    <p class="text-xs text-gray-500 mt-1">{{ company.industry|default:"Industry N/A" }}</p>
+                                    <div class="flex items-center mt-2">
+                                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                        <span class="text-xs text-gray-400">Click to ask about this company</span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-8">
+                                <i class="fas fa-building text-4xl text-gray-300 mb-3"></i>
+                                <p class="text-gray-500 text-sm">No companies in this workspace yet.</p>
+                                <a href="{% url 'research' workspace.id %}"
+                                   class="inline-flex items-center mt-3 px-3 py-1 text-xs bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors">
+                                    <i class="fas fa-plus mr-1"></i>
+                                    Add Company
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const chatInput = document.getElementById('chat-input');
+            const sendButton = document.getElementById('send-button');
+            const typingIndicator = document.getElementById('typing-indicator');
+
+            // Scroll to bottom of chat
+            scrollToBottom();
+
+            // Add event listeners
+            sendButton.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // Add user message to chat
+                addMessage(message, true);
+
+                // Clear input and disable while processing
+                chatInput.value = '';
+                chatInput.disabled = true;
+                sendButton.disabled = true;
+                sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                // Show typing indicator
+                typingIndicator.classList.remove('hidden');
+                scrollToBottom();
+
+                // Send message to server
+                fetch('{% url "chat_message" workspace_id=workspace.id %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    body: JSON.stringify({ message: message })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide typing indicator and re-enable input
+                    typingIndicator.classList.add('hidden');
+                    chatInput.disabled = false;
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+
+                    if (data.status === 'success') {
+                        // Add assistant message to chat
+                        addMessage(data.response, false);
+                    } else {
+                        // Add error message
+                        addMessage("I'm sorry, I couldn't process your request: " + data.message, false);
+                    }
+
+                    // Focus back on input
+                    chatInput.focus();
+                })
+                .catch(error => {
+                    // Hide typing indicator and re-enable input
+                    typingIndicator.classList.add('hidden');
+                    chatInput.disabled = false;
+                    sendButton.disabled = false;
+                    sendButton.innerHTML = '<i class="fas fa-paper-plane"></i>';
+
+                    // Add error message
+                    addMessage("I'm sorry, there was an error processing your request.", false);
+                    console.error('Error:', error);
+
+                    // Focus back on input
+                    chatInput.focus();
+                });
+            }
+
+            function addMessage(content, isUser) {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.classList.add('mb-4', 'flex');
+                messageWrapper.classList.add(isUser ? 'justify-end' : 'justify-start');
+
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('max-w-xs', 'lg:max-w-md', 'px-4', 'py-3', 'rounded-lg');
+
+                if (isUser) {
+                    messageDiv.classList.add('bg-blue-600', 'text-white', 'rounded-br-none');
+                    messageDiv.textContent = content;
+                } else {
+                    messageDiv.classList.add('bg-white', 'text-gray-800', 'rounded-bl-none', 'shadow-sm', 'border');
+
+                    // Add assistant indicator
+                    const indicator = document.createElement('div');
+                    indicator.classList.add('flex', 'items-center', 'mb-2');
+                    indicator.innerHTML = `
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        <span class="text-sm font-medium text-gray-500">Assistant</span>
+                    `;
+                    messageDiv.appendChild(indicator);
+
+                    // Format and add content
+                    const contentDiv = document.createElement('div');
+                    contentDiv.innerHTML = formatContent(content);
+                    messageDiv.appendChild(contentDiv);
+                }
+
+                messageWrapper.appendChild(messageDiv);
+
+                // Insert before typing indicator
+                chatMessages.insertBefore(messageWrapper, typingIndicator);
+
+                scrollToBottom();
+            }
+
+            function formatContent(content) {
+                // Convert markdown bold to HTML
+                content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+                // Convert markdown italic to HTML
+                content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+                // Add proper line breaks
+                content = content.replace(/\n/g, '<br>');
+
+                // Format numbered lists (1. Item)
+                content = content.replace(/(\d+\.\s.*?)(?=\n\d+\.|\n\n|$)/gs, '<li class="ml-4 mb-1">$1</li>');
+                content = content.replace(/(<li[^>]*>.*?<\/li>)+/gs, '<ol class="list-decimal list-inside mb-2">$&</ol>');
+
+                // Format bullet lists (• Item or - Item)
+                content = content.replace(/([•\-]\s.*?)(?=\n[•\-]|\n\n|$)/gs, '<li class="ml-4 mb-1">$1</li>');
+                content = content.replace(/(<li[^>]*>[•\-].*?<\/li>)+/gs, '<ul class="list-disc list-inside mb-2">$&</ul>');
+                content = content.replace(/<li[^>]*>([•\-])\s*(.*?)<\/li>/g, '<li class="ml-4 mb-1">$2</li>');
+
+                // Add paragraph spacing for double line breaks
+                content = content.replace(/\n\n/g, '</p><p class="mb-2">');
+
+                // Wrap in paragraph if not already wrapped
+                if (!content.includes('<p>') && !content.includes('<ol>') && !content.includes('<ul>')) {
+                    content = '<p class="mb-2">' + content + '</p>';
+                }
+
+                return content;
+            }
+
+            function scrollToBottom() {
+                setTimeout(() => {
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 100);
+            }
+
+            // Helper to get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });
+
+        function askAboutCompany(companyName) {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.value = `Tell me about ${companyName}`;
+            chatInput.focus();
+            // Add a small visual feedback
+            const companyCal = event.target.closest('.company-card');
+            if (companyCard) {
+                companyCard.classList.add('ring-2', 'ring-blue-500');
+                setTimeout(() => {
+                    companyCard.classList.remove('ring-2', 'ring-blue-500');
+                }, 1000);
+            }
+            document.getElementById('send-button').click();
+        }
+
+        function askSuggestion(button) {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.value = button.textContent.trim();
+            chatInput.focus();
+            // Add visual feedback to suggestion button
+            button.classList.add('bg-blue-100', 'text-blue-700');
+            setTimeout(() => {
+                button.classList.remove('bg-blue-100', 'text-blue-700');
+                button.classList.add('bg-gray-100', 'text-gray-700');
+            }, 1000);
+            document.getElementById('send-button').click();
+        }
+    </script>
+</body>
+</html>

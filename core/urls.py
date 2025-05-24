@@ -7,9 +7,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('apps.users.urls')),
     path('workspaces/', include('apps.workspaces.urls')),
-    path('compare/', include('apps.compare.urls')),
+    path('', include('apps.compare.urls')),
+    path('', include('apps.chatbot.urls'))
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 websocket_urlpatterns = [
-    path('ws/notifications/', NotificationConsumer.as_asgi())
+    path('ws/notification/', NotificationConsumer.as_asgi())
 ]

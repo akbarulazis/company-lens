@@ -6,11 +6,11 @@ from .models import CompanyProfile, Company
 from django.contrib import  messages
 from .tasks import process_research, compare_profiles, process_document
 from .utils import markdown_to_html
-# Create your views here.
+
 class ResearchCompanyView(LoginRequiredMixin, View):
     def get(self, request, pk):
         workspace = get_object_or_404(Workspace, id=pk, user=request.user)
-        # Check if a company name was provided in the URL parameters
+
         company_name = request.GET.get("company_name")
         context = {"workspace": workspace}
         
@@ -24,7 +24,7 @@ class ResearchCompanyView(LoginRequiredMixin, View):
         company_name = request.POST.get("company_name")
         print(company_name)
         if company_name:
-            # Check if workspace has reached the limit of 3 companies
+
             if workspace.get_companies_count() >= 3:
                 messages.error(request,
                                "Workspace already has 3 companies. Please remove a company or create a new workspace.")

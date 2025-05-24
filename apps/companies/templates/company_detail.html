@@ -10,6 +10,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Add Chart.js for visualizations -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        /* Custom styles for better content presentation */
+        .content-section {
+            transition: all 0.3s ease;
+        }
+        .content-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        }
+        .highlight-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-left: 4px solid #3b82f6;
+        }
+        .metric-highlight {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8 max-w-6xl">
@@ -177,272 +197,329 @@
             {% endif %}
         </div>
 
-
-
-<!-- Company Profile Content -->
-<div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <h2 class="text-2xl font-semibold mb-6 text-gray-800">Company Profile</h2>
-
-    <!-- Improved profile content structure -->
-    <div class="space-y-8">
-        <!-- Overview Section -->
-        <div>
-            <h3 class="text-xl font-semibold text-blue-600 border-b border-gray-200 pb-2 mb-4">1. COMPANY OVERVIEW</h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
-                <div>
-                    <p class="mb-2"><span class="font-medium">Full Legal Name:</span> {{ profile.legal_name|default:"PT Bank Central Asia Tbk." }}</p>
-                    <p class="mb-2"><span class="font-medium">Headquarters:</span> {{ profile.headquarters|default:"Jakarta, Indonesia" }}</p>
-                    <p class="mb-2"><span class="font-medium">Year Founded:</span> {{ profile.year_founded|default:"1957" }}</p>
-                    <p class="mb-2"><span class="font-medium">Ticker Symbol:</span> {{ profile.ticker|default:"BBCA" }}</p>
-                </div>
-                <div>
-                    <p class="mb-2"><span class="font-medium">Industry:</span> {{ profile.industry|default:"Banking" }}</p>
-                    <p class="mb-2"><span class="font-medium">Employees:</span> {{ profile.employees|default:"Approximately 30,000" }}</p>
-                    <p class="mb-2"><span class="font-medium">Locations:</span> {{ profile.locations|default:"Over 1,200 branches across Indonesia" }}</p>
-                    <p class="mb-2"><span class="font-medium">Status:</span> {{ profile.company_status|default:"Public company, listed on Indonesia Stock Exchange" }}</p>
-                </div>
+        <!-- Improved Company Profile Content -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <div class="flex items-center mb-8">
+                <i class="fas fa-building text-blue-600 text-2xl mr-3"></i>
+                <h2 class="text-2xl font-semibold text-gray-800">Company Profile</h2>
             </div>
 
-            <div class="mt-4">
-                <p class="font-medium mb-2">Brief Company History:</p>
-                <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
-                    <p class="mb-2">Founded by a group of Indonesian entrepreneurs, BCA initially operated as a small bank in Jakarta.</p>
-                    <p class="mb-2">Key milestones include the establishment of multiple branches across Indonesia throughout the 1980s and 1990s, marking its expansion in the national market.</p>
-                    <p class="mb-2">Became a publicly-listed company on the Jakarta Stock Exchange in 2000, further solidifying its presence and capital base.</p>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <p class="font-medium mb-2">Primary Business Activities:</p>
-                <div class="pl-4 border-l-4 border-blue-100 text-gray-700">
-                    <p>Provides a comprehensive range of banking services including retail banking, corporate banking, treasury services, and investment banking.</p>
-                    <p>Classified under the Banking sector (Industry Classification: NACE code 6419).</p>
-                </div>
+            <!-- Enhanced content structure with better formatting -->
+            <div class="space-y-6" id="company-profile-content">
+                <!-- This JavaScript will process and enhance the profile content -->
             </div>
         </div>
 
-        <!-- Financial Performance Section -->
-        <div>
-            <h3 class="text-xl font-semibold text-blue-600 border-b border-gray-200 pb-2 mb-4">2. FINANCIAL PERFORMANCE</h3>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                <!-- Revenue Card -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Revenue (2022)</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 106 trillion</p>
-                    <p class="text-sm text-gray-600">
-                        <span class="inline-flex items-center text-green-600">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
-                            </svg>
-                            5% increase
-                        </span>
-                        from IDR 101 trillion in 2021
-                    </p>
-                </div>
-
-                <!-- Profit Card -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Net Profit (2022)</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 38 trillion</p>
-                    <p class="text-sm text-gray-600">Profit margin: <span class="font-semibold">36%</span></p>
-                </div>
-
-                <!-- Assets Card -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Total Assets</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 1,200 trillion</p>
-                    <p class="text-sm text-gray-600">As of 2022</p>
-                </div>
-
-                <!-- Equity Card -->
-                <div class="bg-gray-50 rounded-lg p-4">
-                    <h4 class="font-medium text-gray-800 mb-2">Total Equity</h4>
-                    <p class="text-3xl font-bold text-blue-700 mb-1">IDR 150 trillion</p>
-                    <p class="text-sm text-gray-600">Liabilities: IDR 1,050 trillion</p>
-                </div>
-            </div>
-
-            <div class="mt-6 bg-blue-50 rounded-lg p-4">
-                <h4 class="font-medium text-gray-800 mb-2">Key Financial Metrics:</h4>
-                <ul class="list-disc pl-5 space-y-1 text-gray-700">
-                    <li>ROE: <span class="font-semibold">25.9%</span></li>
-                    <li>Debt-to-Equity Ratio: <span class="font-semibold">7.0</span></li>
-                    <li>NPL Ratio: <span class="font-semibold">2.1%</span></li>
-                    <li>Gross Profit: <span class="font-semibold">IDR 66 trillion</span></li>
-                    <li>Operating Profit: <span class="font-semibold">IDR 52 trillion</span></li>
-                </ul>
-            </div>
-        </div>
-
-        <!-- Additional Sections -->
-        <div class="prose prose-blue max-w-none">
-            {{ profile.profile_content|safe }}
-        </div>
-    </div>
-</div>
-
-    <!-- Delete Company Modal -->
-    <div id="deleteCompanyModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full bg-black bg-opacity-50 flex items-center justify-center">
-        <div class="relative w-full max-w-md max-h-full">
-            <div class="relative bg-white rounded-lg shadow">
-                <div class="flex items-center justify-between p-4 border-b rounded-t">
-                    <h3 class="text-xl font-semibold text-gray-800">Confirm Removal</h3>
-                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="deleteCompanyModal">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="p-6 space-y-4">
-                    <p class="text-gray-600">Are you sure you want to remove "{{ profile.company_name }}" from this workspace?</p>
-                    <p class="text-red-600">This will delete all company data and documents. This action cannot be undone.</p>
-                </div>
-                <div class="flex items-center p-4 space-x-2 border-t border-gray-200 rounded-b">
-                    <button type="button" class="px-4 py-2 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-modal-hide="deleteCompanyModal">
-                        Cancel
-                    </button>
-                    <form action="{% url 'delete_company' workspace_id=workspace.id company_name=profile.company_name %}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">
-                            Remove Company
+        <!-- Delete Company Modal -->
+        <div id="deleteCompanyModal" tabindex="-1" aria-hidden="true" class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-full max-h-full bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="relative w-full max-w-md max-h-full">
+                <div class="relative bg-white rounded-lg shadow">
+                    <div class="flex items-center justify-between p-4 border-b rounded-t">
+                        <h3 class="text-xl font-semibold text-gray-800">Confirm Removal</h3>
+                        <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center" data-modal-hide="deleteCompanyModal">
+                            <i class="fas fa-times"></i>
                         </button>
-                    </form>
+                    </div>
+                    <div class="p-6 space-y-4">
+                        <p class="text-gray-600">Are you sure you want to remove "{{ profile.company_name }}" from this workspace?</p>
+                        <p class="text-red-600">This will delete all company data and documents. This action cannot be undone.</p>
+                    </div>
+                    <div class="flex items-center p-4 space-x-2 border-t border-gray-200 rounded-b">
+                        <button type="button" class="px-4 py-2 text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-100" data-modal-hide="deleteCompanyModal">
+                            Cancel
+                        </button>
+                        <form action="{% url 'delete_company' workspace_id=workspace.id company_name=profile.company_name %}" method="POST">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-lg hover:bg-red-700">
+                                Remove Company
+                            </button>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Charts initialization script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            {% if profile.overall_score > 0 %}
-            // Data for radar chart
-            const radarData = {
-                labels: [
-                    'Financial Health',
-                    'Business Risk',
-                    'Growth Potential',
-                    'Industry Position',
-                    'External Trends'
-                ],
-                datasets: [{
-                    label: 'Investment Scores',
-                    data: [
-                        {{ profile.financial_health_score|floatformat:1 }},
-                        {{ profile.business_risk_score|floatformat:1 }},
-                        {{ profile.growth_potential_score|floatformat:1 }},
-                        {{ profile.industry_position_score|floatformat:1 }},
-                        {{ profile.external_trends_score|floatformat:1 }}
+        <!-- Enhanced JavaScript for charts and content processing -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                {% if profile.overall_score > 0 %}
+                // Radar chart configuration (existing code)
+                const radarData = {
+                    labels: [
+                        'Financial Health',
+                        'Business Risk',
+                        'Growth Potential',
+                        'Industry Position',
+                        'External Trends'
                     ],
-                    fill: true,
-                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
-                    borderColor: 'rgb(37, 99, 235)',
-                    pointBackgroundColor: 'rgb(37, 99, 235)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(37, 99, 235)'
-                }]
-            };
+                    datasets: [{
+                        label: 'Investment Scores',
+                        data: [
+                            {{ profile.financial_health_score|floatformat:1 }},
+                            {{ profile.business_risk_score|floatformat:1 }},
+                            {{ profile.growth_potential_score|floatformat:1 }},
+                            {{ profile.industry_position_score|floatformat:1 }},
+                            {{ profile.external_trends_score|floatformat:1 }}
+                        ],
+                        fill: true,
+                        backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                        borderColor: 'rgb(37, 99, 235)',
+                        pointBackgroundColor: 'rgb(37, 99, 235)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(37, 99, 235)'
+                    }]
+                };
 
-            // Config for radar chart
-            const radarConfig = {
-                type: 'radar',
-                data: radarData,
-                options: {
-                    scales: {
-                        r: {
-                            beginAtZero: true,
-                            min: 0,
-                            max: 5,
-                            ticks: {
-                                stepSize: 1
+                const radarConfig = {
+                    type: 'radar',
+                    data: radarData,
+                    options: {
+                        scales: {
+                            r: {
+                                beginAtZero: true,
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: true
+                    }
+                };
+
+                new Chart(document.getElementById('radarChart'), radarConfig);
+
+                // Bar chart configuration (existing code)
+                const barData = {
+                    labels: [
+                        'Financial Health',
+                        'Business Risk',
+                        'Growth Potential',
+                        'Industry Position',
+                        'External Trends',
+                        'Overall'
+                    ],
+                    datasets: [{
+                        label: 'Investment Scores',
+                        data: [
+                            {{ profile.financial_health_score|floatformat:1 }},
+                            {{ profile.business_risk_score|floatformat:1 }},
+                            {{ profile.growth_potential_score|floatformat:1 }},
+                            {{ profile.industry_position_score|floatformat:1 }},
+                            {{ profile.external_trends_score|floatformat:1 }},
+                            {{ profile.overall_score|floatformat:1 }}
+                        ],
+                        backgroundColor: [
+                            {% if profile.financial_health_score <= 1 %}'#dc2626'{% elif profile.financial_health_score <= 2 %}'#ea580c'{% elif profile.financial_health_score <= 3 %}'#f59e0b'{% elif profile.financial_health_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
+                            {% if profile.business_risk_score <= 1 %}'#dc2626'{% elif profile.business_risk_score <= 2 %}'#ea580c'{% elif profile.business_risk_score <= 3 %}'#f59e0b'{% elif profile.business_risk_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
+                            {% if profile.growth_potential_score <= 1 %}'#dc2626'{% elif profile.growth_potential_score <= 2 %}'#ea580c'{% elif profile.growth_potential_score <= 3 %}'#f59e0b'{% elif profile.growth_potential_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
+                            {% if profile.industry_position_score <= 1 %}'#dc2626'{% elif profile.industry_position_score <= 2 %}'#ea580c'{% elif profile.industry_position_score <= 3 %}'#f59e0b'{% elif profile.industry_position_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
+                            {% if profile.external_trends_score <= 1 %}'#dc2626'{% elif profile.external_trends_score <= 2 %}'#ea580c'{% elif profile.external_trends_score <= 3 %}'#f59e0b'{% elif profile.external_trends_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
+                            {% if profile.overall_score <= 1 %}'#dc2626'{% elif profile.overall_score <= 2 %}'#ea580c'{% elif profile.overall_score <= 3 %}'#f59e0b'{% elif profile.overall_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %}
+                        ]
+                    }]
+                };
+
+                const barConfig = {
+                    type: 'bar',
+                    data: barData,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 5
+                            }
+                        },
+                        responsive: true,
+                        maintainAspectRatio: true
+                    }
+                };
+
+                new Chart(document.getElementById('barChart'), barConfig);
+                {% endif %}
+
+                // Enhanced content processing function
+                function processProfileContent() {
+                    const profileContent = `{{ profile.profile_content|safe|escapejs }}`;
+                    const contentContainer = document.getElementById('company-profile-content');
+
+                    if (!profileContent.trim()) {
+                        contentContainer.innerHTML = '<div class="text-gray-500 text-center py-8">No profile content available</div>';
+                        return;
+                    }
+
+                    // Create a temporary div to parse the content
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = profileContent;
+
+                    // Define section icons mapping
+                    const sectionIcons = {
+                        'COMPANY OVERVIEW': 'fas fa-building',
+                        'FINANCIAL PERFORMANCE': 'fas fa-chart-line',
+                        'LEADERSHIP': 'fas fa-users',
+                        'GOVERNANCE': 'fas fa-shield-alt',
+                        'BUSINESS MODEL': 'fas fa-cogs',
+                        'REVENUE STREAMS': 'fas fa-dollar-sign',
+                        'OPERATIONAL STRATEGY': 'fas fa-strategy',
+                        'MARKET POSITION': 'fas fa-map-marker-alt',
+                        'COMPETITION': 'fas fa-chess',
+                        'STRATEGIC INITIATIVES': 'fas fa-rocket',
+                        'SUPPLY CHAIN': 'fas fa-truck',
+                        'LOGISTICS': 'fas fa-boxes',
+                        'RISK FACTORS': 'fas fa-exclamation-triangle',
+                        'CHALLENGES': 'fas fa-mountain',
+                        'ESG': 'fas fa-leaf',
+                        'RECENT DEVELOPMENTS': 'fas fa-newspaper'
+                    };
+
+                    function getIconForSection(text) {
+                        const upperText = text.toUpperCase();
+                        for (const [key, icon] of Object.entries(sectionIcons)) {
+                            if (upperText.includes(key)) {
+                                return icon;
                             }
                         }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: true
-                }
-            };
+                        return 'fas fa-info-circle';
+                    }
 
-            // Create radar chart
-            const radarChart = new Chart(
-                document.getElementById('radarChart'),
-                radarConfig
-            );
+                    function createSectionCard(title, content, index) {
+                        const icon = getIconForSection(title);
+                        const sectionNumber = index + 1;
 
-            // Data for bar chart
-            const barData = {
-                labels: [
-                    'Financial Health',
-                    'Business Risk',
-                    'Growth Potential',
-                    'Industry Position',
-                    'External Trends',
-                    'Overall'
-                ],
-                datasets: [{
-                    label: 'Investment Scores',
-                    data: [
-                        {{ profile.financial_health_score|floatformat:1 }},
-                        {{ profile.business_risk_score|floatformat:1 }},
-                        {{ profile.growth_potential_score|floatformat:1 }},
-                        {{ profile.industry_position_score|floatformat:1 }},
-                        {{ profile.external_trends_score|floatformat:1 }},
-                        {{ profile.overall_score|floatformat:1 }}
-                    ],
-                    backgroundColor: [
-                        {% if profile.financial_health_score <= 1 %}'#dc2626'{% elif profile.financial_health_score <= 2 %}'#ea580c'{% elif profile.financial_health_score <= 3 %}'#f59e0b'{% elif profile.financial_health_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
-                        {% if profile.business_risk_score <= 1 %}'#dc2626'{% elif profile.business_risk_score <= 2 %}'#ea580c'{% elif profile.business_risk_score <= 3 %}'#f59e0b'{% elif profile.business_risk_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
-                        {% if profile.growth_potential_score <= 1 %}'#dc2626'{% elif profile.growth_potential_score <= 2 %}'#ea580c'{% elif profile.growth_potential_score <= 3 %}'#f59e0b'{% elif profile.growth_potential_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
-                        {% if profile.industry_position_score <= 1 %}'#dc2626'{% elif profile.industry_position_score <= 2 %}'#ea580c'{% elif profile.industry_position_score <= 3 %}'#f59e0b'{% elif profile.industry_position_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
-                        {% if profile.external_trends_score <= 1 %}'#dc2626'{% elif profile.external_trends_score <= 2 %}'#ea580c'{% elif profile.external_trends_score <= 3 %}'#f59e0b'{% elif profile.external_trends_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %},
-                        {% if profile.overall_score <= 1 %}'#dc2626'{% elif profile.overall_score <= 2 %}'#ea580c'{% elif profile.overall_score <= 3 %}'#f59e0b'{% elif profile.overall_score <= 4 %}'#14b8a6'{% else %}'#16a34a'{% endif %}
-                    ]
-                }]
-            };
+                        return `
+                            <div class="content-section bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                                <div class="section-header text-white p-4 rounded-t-lg">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
+                                            <i class="${icon} text-white"></i>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm font-medium opacity-90">${sectionNumber}.</span>
+                                            <h3 class="text-lg font-semibold">${title}</h3>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-6">
+                                    ${content}
+                                </div>
+                            </div>
+                        `;
+                    }
 
-            // Config for bar chart
-            const barConfig = {
-                type: 'bar',
-                data: barData,
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 5
+                    function formatFinancialData(content) {
+                        // Enhanced formatting for financial data
+                        return content
+                            .replace(/IDR\s+(\d+(?:,\d{3})*(?:\.\d+)?)\s*(trillion|billion|million)/gi,
+                                '<span class="metric-highlight px-2 py-1 rounded font-semibold text-blue-800">IDR $1 $2</span>')
+                            .replace(/(\d+(?:\.\d+)?%)/g,
+                                '<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-medium">$1</span>')
+                            .replace(/(ROE|ROA|NPL|Debt-to-Equity):\s*([^<\n]+)/gi,
+                                '<div class="inline-block bg-gray-100 px-3 py-1 rounded-lg mr-2 mb-2"><span class="font-medium text-gray-700">$1:</span> <span class="font-semibold text-blue-600">$2</span></div>');
+                    }
+
+                    function enhanceListItems(content) {
+                        // Convert simple lists to enhanced bullet points
+                        return content.replace(/<li>/g, '<li class="flex items-start mb-2"><i class="fas fa-check-circle text-blue-500 mr-2 mt-1"></i><span>');
+                    }
+
+                    function processTextContent(text) {
+                        let processedText = text;
+
+                        // Format financial data
+                        processedText = formatFinancialData(processedText);
+
+                        // Enhance list items
+                        processedText = enhanceListItems(processedText);
+
+                        // Add emphasis to key terms
+                        processedText = processedText.replace(
+                            /\b(Founded|Established|Headquarters|Employees|Revenue|Profit|Assets|CEO|Chairman)\b/gi,
+                            '<span class="font-semibold text-gray-800">$1</span>'
+                        );
+
+                        return processedText;
+                    }
+
+                    // Process the content into sections
+                    const sections = [];
+                    let currentSection = { title: '', content: '' };
+
+                    Array.from(tempDiv.childNodes).forEach(node => {
+                        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+                            const text = node.textContent.trim();
+                            // Check if this looks like a section header (contains numbers and uppercase)
+                            if (/^\d+\.\s*[A-Z\s&]+$/.test(text)) {
+                                if (currentSection.title) {
+                                    sections.push(currentSection);
+                                }
+                                currentSection = {
+                                    title: text.replace(/^\d+\.\s*/, ''),
+                                    content: ''
+                                };
+                            } else {
+                                currentSection.content += text + '\n';
+                            }
+                        } else if (node.nodeType === Node.ELEMENT_NODE) {
+                            if (node.tagName && ['H1', 'H2', 'H3', 'H4'].includes(node.tagName)) {
+                                if (currentSection.title) {
+                                    sections.push(currentSection);
+                                }
+                                currentSection = {
+                                    title: node.textContent.replace(/^\d+\.\s*/, ''),
+                                    content: ''
+                                };
+                            } else {
+                                currentSection.content += node.outerHTML || node.textContent || '';
+                            }
                         }
-                    },
-                    responsive: true,
-                    maintainAspectRatio: true
+                    });
+
+                    if (currentSection.title) {
+                        sections.push(currentSection);
+                    }
+
+                    // If no sections found, treat entire content as one section
+                    if (sections.length === 0) {
+                        sections.push({
+                            title: 'Business Profile',
+                            content: profileContent
+                        });
+                    }
+
+                    // Generate enhanced HTML
+                    const enhancedHTML = sections.map((section, index) => {
+                        const processedContent = processTextContent(section.content);
+                        return createSectionCard(section.title, processedContent, index);
+                    }).join('');
+
+                    contentContainer.innerHTML = enhancedHTML;
                 }
-            };
 
-            // Create bar chart
-            const barChart = new Chart(
-                document.getElementById('barChart'),
-                barConfig
-            );
-            {% endif %}
+                // Process the profile content
+                processProfileContent();
 
-            // Modal functionality
-            const modalToggles = document.querySelectorAll('[data-modal-target]');
-            modalToggles.forEach(toggle => {
-                toggle.addEventListener('click', function() {
-                    const modalId = this.getAttribute('data-modal-target');
-                    const modal = document.getElementById(modalId);
-                    if (modal) modal.classList.remove('hidden');
+                // Modal functionality (existing code)
+                const modalToggles = document.querySelectorAll('[data-modal-target]');
+                modalToggles.forEach(toggle => {
+                    toggle.addEventListener('click', function() {
+                        const modalId = this.getAttribute('data-modal-target');
+                        const modal = document.getElementById(modalId);
+                        if (modal) modal.classList.remove('hidden');
+                    });
+                });
+
+                const modalHides = document.querySelectorAll('[data-modal-hide]');
+                modalHides.forEach(hide => {
+                    hide.addEventListener('click', function() {
+                        const modalId = this.getAttribute('data-modal-hide');
+                        const modal = document.getElementById(modalId);
+                        if (modal) modal.classList.add('hidden');
+                    });
                 });
             });
-
-            const modalHides = document.querySelectorAll('[data-modal-hide]');
-            modalHides.forEach(hide => {
-                hide.addEventListener('click', function() {
-                    const modalId = this.getAttribute('data-modal-hide');
-                    const modal = document.getElementById(modalId);
-                    if (modal) modal.classList.add('hidden');
-                });
-            });
-        });
-    </script>
-</body>
+        </script>
+    </body>
 </html>

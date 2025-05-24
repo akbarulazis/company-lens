@@ -55,7 +55,6 @@ def process_research(workspace_id, company_name):
             industry=main_info.get('industry'),
             profile_content=business_profile
         )
-        profile.save()
 
         com_name = Company.objects.create(name=company_name)
         WorkspaceCompany.objects.create(workspace=workspace, company=com_name)

@@ -10,7 +10,14 @@ from .utils import markdown_to_html
 class ResearchCompanyView(LoginRequiredMixin, View):
     def get(self, request, pk):
         workspace = get_object_or_404(Workspace, id=pk, user=request.user)
-        return render(request, "research_company.html", {"workspace": workspace})
+        # Check if a company name was provided in the URL parameters
+        company_name = request.GET.get("company_name")
+        context = {"workspace": workspace}
+        
+        if company_name:
+            context["prefilled_company"] = company_name
+        
+        return render(request, "research_company.html", context)
 
     def post(self, request, pk):
         workspace = get_object_or_404(Workspace, id=pk, user=request.user)

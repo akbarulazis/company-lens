@@ -57,10 +57,12 @@ def process_research(workspace_id, company_name):
         )
         profile.save()
 
-        com_name = Company.objects.create( name=company_name)
+        com_name = Company.objects.create(name=company_name)
         WorkspaceCompany.objects.create(workspace=workspace, company=com_name)
 
-
+        # Link the company to the profile
+        profile.company = com_name
+        profile.save()
 
         # Calculate investment scores
         calculate_company_scores(profile.id)
@@ -115,7 +117,21 @@ def compare_profiles(profile_ids):
         profiles = []
         for profile_id in profile_ids:
             if profile_id:
-                profiles.append(CompanyProfile.objects.get(id=profile_id))
+                try:
+                    profile = CompanyProfile.objects.get(id=profile_id)
+                    profiles.append(profile)
+                except CompanyProfile.DoesNotExist:
+                    # Try to find by company ID if direct profile ID fails
+                    try:
+                        company = Company.objects.get(id=profile_id)
+                        profile = CompanyProfile.objects.filter(company=company).first()
+                        if profile:
+                            profiles.append(profile)
+                        else:
+                            send_notification("notification", f"No profile found for company: {company.name}")
+                    except Company.DoesNotExist:
+                        send_notification("notification", f"Could not find profile or company with ID: {profile_id}")
+                        continue
 
         if len(profiles) < 2:
             send_notification("notification", "Please select at least two companies to compare.")
@@ -131,8 +147,9 @@ def compare_profiles(profile_ids):
         html = markdown2.markdown(result)
         send_notification("finance_comparison", html)
 
-    except CompanyProfile.DoesNotExist:
-        send_notification("notification", "One or more of the requested profiles could not be found.")
+    except Exception as e:
+        logger.error(f"Error in compare_profiles: {str(e)}")
+        send_notification("notification", f"Error comparing profiles: {str(e)}")
 
 
 @task()

@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Comparison Results | Company Lens</title>
+    <link href="{% static 'output.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Custom styles for comparison content */
+        .comparison-result table,
+        .comparison-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        
+        .comparison-result table th,
+        .comparison-result table td,
+        .comparison-content table th,
+        .comparison-content table td {
+            border: 1px solid #e2e8f0;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .comparison-result table th,
+        .comparison-content table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+        }
+        
+        .comparison-result table tr:nth-child(even),
+        .comparison-content table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        /* Additional styles for AI content */
+        .comparison-content h1, 
+        .comparison-content h2,
+        .comparison-content h3 {
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: #2563eb;
+        }
+        
+        .comparison-content h1 {
+            font-size: 1.5rem;
+        }
+        
+        .comparison-content h2 {
+            font-size: 1.25rem;
+        }
+        
+        .comparison-content h3 {
+            font-size: 1.125rem;
+        }
+        
+        .comparison-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .comparison-content ul,
+        .comparison-content ol {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+        }
+        
+        .comparison-content ul {
+            list-style-type: disc;
+        }
+        
+        .comparison-content ol {
+            list-style-type: decimal;
+        }
+        
+        .comparison-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .ai-badge {
+            background-color: #6366f1;
+            color: white;
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 9999px;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+                <h1 class="text-4xl font-bold mb-2 text-blue-600">
+                    AI-Powered Comparison
+                    <span class="ai-badge">
+                        <i class="fas fa-robot mr-1"></i>AI
+                    </span>
+                </h1>
+                <p class="text-gray-600">Workspace: {{ workspace.name }}</p>
+            </div>
+            <div class="mt-4 md:mt-0 flex space-x-3">
+                <a href="{% url 'simple_compare' workspace.id %}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-sync-alt mr-2"></i> New Comparison
+                </a>
+                <a href="{% url 'workspace_detail' workspace.id %}"
+                   class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Workspace
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="mb-6 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-50 text-green-700{% elif message.tags == 'error' %}bg-red-50 text-red-700{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-700{% elif message.tags == 'info' %}bg-blue-50 text-blue-700{% endif %} relative">
+                    {{ message }}
+                    <button type="button" class="absolute top-4 right-4" onclick="this.parentElement.remove();">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="bg-white rounded-lg shadow-md mb-8">
+            <!-- Comparison header -->
+            <div class="border-b border-gray-200 p-6">
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">
+                        Comparing {{ companies|length }} Companies
+                    </h2>
+                    <div class="mt-2 text-gray-600">
+                        <span class="font-medium">Companies:</span> 
+                        {% for company in companies %}
+                            <span class="inline-block bg-blue-100 text-blue-800 rounded-full px-3 py-1 text-sm font-semibold mr-2 mb-2">
+                                {{ company.name }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                    <div class="mt-3 text-sm text-gray-500">
+                        <i class="fas fa-info-circle mr-1"></i> This comparison was generated by AI based on the companies' profiles and financial data.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Comparison content -->
+            <div class="p-6 comparison-content">
+                <h1>Company Comparison: Shopee vs Blibli</h1>
+                
+                <h2>Summary Overview</h2>
+                <p>Shopee and Blibli are both emerging players in the e-commerce sector in Southeast Asia, with a focus on online retail. Shopee, a subsidiary of Sea Group, has established a strong market presence in Southeast Asia and is expanding into Latin America. Blibli, founded in Indonesia, is primarily focused on the Indonesian market but is looking to expand regionally. Both companies face unique challenges but have demonstrated significant growth potential.</p>
+                
+                <h2>Comparative Analysis of Strengths and Weaknesses</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Strengths</th>
+                            <th>Weaknesses</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Shopee</td>
+                            <td>
+                                <ul>
+                                    <li>Strong brand recognition in Southeast Asia</li>
+                                    <li>High revenue growth (CAGR of 43%)</li>
+                                    <li>Leader in market share (35% in Southeast Asia)</li>
+                                    <li>Advanced technology and logistics support</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>Continues to incur net losses (~$1.2 billion in 2022)</li>
+                                    <li>High debt-to-equity ratio (1.96)</li>
+                                    <li>Negative ROE and ROA</li>
+                                </ul>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Blibli</td>
+                            <td>
+                                <ul>
+                                    <li>Established presence in the Indonesian market</li>
+                                    <li>Strong brand backed by Djarum Group</li>
+                                    <li>Growing revenue (CAGR of 25%)</li>
+                                    <li>Innovative O2O (Online-to-Offline) services</li>
+                                </ul>
+                            </td>
+                            <td>
+                                <ul>
+                                    <li>High debt-to-equity ratio (6.0)</li>
+                                    <li>Continues to incur net losses</li>
+                                    <li>Intense competition from other e-commerce platforms</li>
+                                </ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h2>Score Comparison</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Score Category</th>
+                            <th>Shopee</th>
+                            <th>Blibli</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Financial Health</td>
+                            <td>2.5</td>
+                            <td>2.5</td>
+                        </tr>
+                        <tr>
+                            <td>Business Risk</td>
+                            <td>3.2</td>
+                            <td>3.5</td>
+                        </tr>
+                        <tr>
+                            <td>Growth Potential</td>
+                            <td>4.3</td>
+                            <td>4.0</td>
+                        </tr>
+                        <tr>
+                            <td>Industry Position</td>
+                            <td>4.5</td>
+                            <td>3.8</td>
+                        </tr>
+                        <tr>
+                            <td>External Trends</td>
+                            <td>3.8</td>
+                            <td>3.7</td>
+                        </tr>
+                        <tr>
+                            <td>Overall Score</td>
+                            <td>3.7</td>
+                            <td>3.5</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <p>The scores indicate that Shopee has a slight edge in terms of industry position and growth potential, while Blibli has a higher business risk score, reflecting its challenges in the competitive e-commerce landscape.</p>
+                
+                <h2>Investment Recommendations</h2>
+                <p>Given the analysis, here's a brief investment recommendation:</p>
+                
+                <ul>
+                    <li><strong>Shopee:</strong> Considered a high-potential investment for those willing to accept medium-term risks associated with its path to profitability. Its strong growth metrics and leadership position in Southeast Asia make it an attractive option for investors looking for long-term gains.</li>
+                    <li><strong>Blibli:</strong> Represents a promising opportunity, especially due to its strong growth potential in the Indonesian market. However, investors should be cautious of the financial risks stemming from ongoing losses and high debt levels. The strategic focus on technology and logistics could drive future success.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</body>
+</html> 

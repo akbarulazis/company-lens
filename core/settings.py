@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "apps.scores",
     "apps.users",
     "apps.workspaces",
+    "apps.compare",
 ]
 
 MIDDLEWARE = [
@@ -95,6 +96,15 @@ CHANNEL_LAYERS = {
             'hosts': [('127.0.0.1', 6379)],
             'prefix': 'channels:',
         },
+    }
+}
+
+# Cache settings
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'company-lens-cache',
+        'TIMEOUT': 60*60*24*7,  # 7 days default timeout
     }
 }
 

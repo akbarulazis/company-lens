@@ -78,6 +78,21 @@ class CompanyProfile(models.Model):
             self.save(update_fields=['overall_score'])
         return self.overall_score
 
+    def save(self, *args, **kwargs):
+        # If company is not set but company_name is, try to link to an existing company
+        if not self.company and self.company_name:
+            # Try to find an existing company with the same name
+            try:
+                company = Company.objects.get(name=self.company_name)
+                self.company = company
+            except Company.DoesNotExist:
+                # Create a new company if none exists
+                company = Company.objects.create(name=self.company_name)
+                self.company = company
+        
+        # Call the original save method
+        super().save(*args, **kwargs)
+
 
 class CompanyDocument(models.Model):
     id = models.CharField(max_length=24, primary_key=True, default=generate_id)

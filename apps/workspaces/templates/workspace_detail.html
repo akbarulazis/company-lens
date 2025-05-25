@@ -129,88 +129,189 @@
   </div>
 </div>
 <script>
-  // WebSocket connection
+  // Enhanced WebSocket connection with intelligent fallback
   const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-  const socket = new WebSocket(`${wsScheme}://${window.location.host}/ws/notification/`);
-
   let researchInProgress = false;
+  let socket = null; // We'll initialize this through our connection function
 
-  socket.onopen = function(e) {
-    console.log("WebSocket connected");
-  };
+  // Function to create WebSocket connection with fallback logic
+  function createWebSocketConnection() {
+    // First, try connecting using the same host and port as your web application
+    const primaryUrl = `${wsScheme}://${window.location.host}/ws/notification/`;
+    console.log("Attempting WebSocket connection to:", primaryUrl);
 
-  socket.onmessage = function(e) {
-    const data = JSON.parse(e.data);
-    const message = data.message;
+    let currentSocket = new WebSocket(primaryUrl);
+    let connectionTimeout;
+    let hasConnected = false;
+
+    // Set a reasonable timeout to detect if the primary connection stalls
+    // WebSocket connections should establish quickly, so 3 seconds is appropriate
+    connectionTimeout = setTimeout(() => {
+      if (!hasConnected) {
+        console.log("Primary connection timed out, trying fallback port 8001...");
+        currentSocket.close();
+        attemptFallbackConnection();
+      }
+    }, 3000);
+
+    // Handle successful connection to primary route
+    currentSocket.onopen = function(e) {
+      hasConnected = true;
+      clearTimeout(connectionTimeout);
+      console.log("WebSocket connected via primary route");
+      setupWebSocketHandlers(currentSocket);
+    };
+
+    // Handle primary connection errors
+    currentSocket.onerror = function(error) {
+      console.log("Primary WebSocket connection failed:", error);
+      clearTimeout(connectionTimeout);
+      if (!hasConnected) {
+        attemptFallbackConnection();
+      }
+    };
+
+    // Handle primary connection closure before establishment
+    currentSocket.onclose = function(event) {
+      clearTimeout(connectionTimeout);
+      if (!hasConnected) {
+        console.log("Primary connection closed before establishing, trying fallback");
+        attemptFallbackConnection();
+      } else {
+        console.log("WebSocket connection closed");
+        // You could implement reconnection logic here if needed
+      }
+    };
+
+    // Function to attempt connection to port 8001 as fallback
+    function attemptFallbackConnection() {
+      // Extract just the hostname (without port) for the fallback connection
+      const hostname = window.location.hostname;
+      const fallbackUrl = `${wsScheme}://${hostname}:8001/ws/notification/`;
+      console.log("Attempting fallback WebSocket connection to:", fallbackUrl);
+
+      currentSocket = new WebSocket(fallbackUrl);
+
+      currentSocket.onopen = function(e) {
+        console.log("WebSocket connected via fallback route (port 8001)");
+        setupWebSocketHandlers(currentSocket);
+      };
+
+      currentSocket.onerror = function(error) {
+        console.error("Both primary and fallback WebSocket connections failed:", error);
+        showConnectionError();
+      };
+
+      currentSocket.onclose = function(event) {
+        console.log("Fallback WebSocket connection closed");
+        showConnectionError();
+      };
+    }
+
+    return currentSocket;
+  }
+
+  // Function to set up all your existing WebSocket message handlers
+  // This preserves all your original logic exactly as you wrote it
+  function setupWebSocketHandlers(websocket) {
+    // Make the socket globally available for other parts of your application
+    socket = websocket;
+
+    // Your original onmessage handler - completely unchanged!
+    socket.onmessage = function(e) {
+      const data = JSON.parse(e.data);
+      const message = data.message;
+      const messagesDiv = document.getElementById('websocketMessages');
+
+      // Convert message to string if it's not already
+      const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
+
+      // Check if it's a notification message
+      if (messageStr.includes("Research process started") || messageStr.includes("Starting company research...")) {
+        researchInProgress = true;
+        messagesDiv.innerHTML = `
+          <div class="mb-4 p-4 rounded-lg bg-blue-100 text-blue-700">
+            <div class="flex items-center">
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+              <span>Starting company research...</span>
+            </div>
+          </div>
+        `;
+      } else if (messageStr.includes("Generating business profile...")) {
+        messagesDiv.innerHTML = `
+          <div class="mb-4 p-4 rounded-lg bg-blue-100 text-blue-700">
+            <div class="flex items-center">
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+              <span>Generating business profile...</span>
+            </div>
+          </div>
+        `;
+      } else if (messageStr.includes("Calculating investment scores")) {
+        messagesDiv.innerHTML = `
+          <div class="mb-4 p-4 rounded-lg bg-blue-100 text-blue-700">
+            <div class="flex items-center">
+              <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+              <span>Calculating investment scores...</span>
+            </div>
+          </div>
+        `;
+      } else if (messageStr.includes("Investment scoring completed")) {
+        messagesDiv.innerHTML = `
+          <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-700">
+            <div class="flex items-center">
+              <i class="fas fa-check-circle mr-2"></i>
+              <span>Research completed! Refreshing...</span>
+            </div>
+          </div>
+        `;
+        // Refresh the page after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      } else if (messageStr.includes("Error during research")) {
+        researchInProgress = false;
+        messagesDiv.innerHTML = `
+          <div class="mb-4 p-4 rounded-lg bg-red-100 text-red-700">
+            <div class="flex items-center">
+              <i class="fas fa-exclamation-circle mr-2"></i>
+              <span>${messageStr}</span>
+            </div>
+          </div>
+        `;
+      }
+    };
+
+    // Your original error handler
+    socket.onerror = function(error) {
+      console.error("WebSocket error:", error);
+    };
+
+    // Your original close handler
+    socket.onclose = function(e) {
+      console.log("WebSocket closed");
+    };
+  }
+
+  // Function to show connection error when both primary and fallback fail
+  function showConnectionError() {
     const messagesDiv = document.getElementById('websocketMessages');
-
-    // Convert message to string if it's not already
-    const messageStr = typeof message === 'string' ? message : JSON.stringify(message);
-
-    // Check if it's a notification message
-    if (messageStr.includes("Research process started") || messageStr.includes("Starting company research...")) {
-      researchInProgress = true;
-      messagesDiv.innerHTML = `
-        <div class="mb-4 p-4 rounded-lg bg-blue-100 text-blue-700">
-          <div class="flex items-center">
-            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            <span>Starting company research...</span>
-          </div>
-        </div>
-      `;
-    } else if (messageStr.includes("Generating business profile...")) {
-      messagesDiv.innerHTML = `
-        <div class="mb-4 p-4 rounded-lg bg-blue-100 text-blue-700">
-          <div class="flex items-center">
-            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            <span>Generating business profile...</span>
-          </div>
-        </div>
-      `;
-    } else if (messageStr.includes("Calculating investment scores")) {
-      messagesDiv.innerHTML = `
-        <div class="mb-4 p-4 rounded-lg bg-blue-100 text-blue-700">
-          <div class="flex items-center">
-            <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
-            <span>Calculating investment scores...</span>
-          </div>
-        </div>
-      `;
-    } else if (messageStr.includes("Investment scoring completed")) {
-      messagesDiv.innerHTML = `
-        <div class="mb-4 p-4 rounded-lg bg-green-100 text-green-700">
-          <div class="flex items-center">
-            <i class="fas fa-check-circle mr-2"></i>
-            <span>Research completed! Refreshing...</span>
-          </div>
-        </div>
-      `;
-      // Refresh the page after a short delay
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    } else if (messageStr.includes("Error during research")) {
-      researchInProgress = false;
+    if (messagesDiv) {
       messagesDiv.innerHTML = `
         <div class="mb-4 p-4 rounded-lg bg-red-100 text-red-700">
           <div class="flex items-center">
             <i class="fas fa-exclamation-circle mr-2"></i>
-            <span>${messageStr}</span>
+            <span>WebSocket error. Please refresh the page.</span>
           </div>
         </div>
       `;
     }
-  };
+  }
 
-  socket.onerror = function(error) {
-    console.error("WebSocket error:", error);
-  };
+  // Initialize the WebSocket connection with fallback capability
+  // This replaces your original single line of WebSocket creation
+  socket = createWebSocketConnection();
 
-  socket.onclose = function(e) {
-    console.log("WebSocket closed");
-  };
-
-  // Simple dropdown toggle
+  // Your original DOM content loaded handler - completely unchanged!
   document.addEventListener('DOMContentLoaded', function() {
     const dropdownButtons = document.querySelectorAll('.dropdown button');
 

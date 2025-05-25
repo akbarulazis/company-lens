@@ -181,84 +181,134 @@
         </div>
     </div>
 
-    <script>
-        // Auto-hide message after 3 seconds
-        document.addEventListener('DOMContentLoaded', function() {
-            const messagesContainer = document.getElementById('messages-container');
-            if (messagesContainer) {
+ <script>
+    // Auto-hide message after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const messagesContainer = document.getElementById('messages-container');
+        if (messagesContainer) {
+            setTimeout(function() {
+                messagesContainer.style.transition = 'opacity 0.5s ease';
+                messagesContainer.style.opacity = '0';
                 setTimeout(function() {
-                    messagesContainer.style.transition = 'opacity 0.5s ease';
-                    messagesContainer.style.opacity = '0';
-                    setTimeout(function() {
-                        messagesContainer.style.display = 'none';
-                    }, 500);
-                }, 3000);
-            }
-            
-            // WebSocket connection for real-time updates
-            const notificationContainer = document.getElementById('notification-container');
-            const resultContainer = document.getElementById('result-container');
-            const processingSection = document.getElementById('processing-section');
-            const comparisonContent = document.getElementById('comparison-content');
-            
-            // Connect to WebSocket
+                    messagesContainer.style.display = 'none';
+                }, 500);
+            }, 3000);
+        }
+
+        // WebSocket connection for real-time updates
+        const notificationContainer = document.getElementById('notification-container');
+        const resultContainer = document.getElementById('result-container');
+        const processingSection = document.getElementById('processing-section');
+        const comparisonContent = document.getElementById('comparison-content');
+
+        // Enhanced WebSocket creation with fallback to port 8001
+        function createComparisonSocketWithFallback() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const socket = new WebSocket(`${protocol}//${window.location.host}/ws/notifications/`);
-            
-            socket.onopen = function(e) {
+            const primaryUrl = `${protocol}//${window.location.hostname}:8001/ws/notifications/`;
+            console.log("Attempting primary comparison WebSocket connection:", primaryUrl);
+
+            let currentSocket = new WebSocket(primaryUrl);
+            let hasConnected = false;
+
+            // Set timeout to detect if primary connection stalls
+            const connectionTimeout = setTimeout(() => {
+                if (!hasConnected) {
+                    console.log("Primary comparison connection failed, trying port 8001...");
+                    currentSocket.close();
+
+                    // Create fallback connection to port 8001
+                    const hostname = window.location.hostname;
+                    const fallbackUrl = `${protocol}//${hostname}:8001/ws/notifications/`;
+                    console.log("Attempting fallback comparison connection:", fallbackUrl);
+
+                    currentSocket = new WebSocket(fallbackUrl);
+                    setupComparisonSocketHandlers(currentSocket);
+                }
+            }, 3000);
+
+            // Handle successful primary connection
+            currentSocket.onopen = function(e) {
+                hasConnected = true;
+                clearTimeout(connectionTimeout);
+                console.log("Comparison WebSocket connected via primary route");
+                setupComparisonSocketHandlers(currentSocket);
+            };
+
+            // Handle primary connection errors
+            currentSocket.onerror = function(error) {
+                clearTimeout(connectionTimeout);
+                if (!hasConnected) {
+                    console.log("Primary comparison connection error, will try fallback");
+                }
+            };
+
+            return currentSocket;
+        }
+
+        // Function to setup handlers for whichever socket connection succeeds
+        function setupComparisonSocketHandlers(activeSocket) {
+            // Your original onopen handler - exactly the same!
+            activeSocket.onopen = function(e) {
                 addNotification('Connected to server. Waiting for updates...', 'blue');
             };
-            
-            socket.onmessage = function(e) {
+
+            // Your original onmessage handler - completely unchanged!
+            activeSocket.onmessage = function(e) {
                 const data = JSON.parse(e.data);
-                
+
                 if (data.type === 'notification') {
                     addNotification(data.message.content, 'blue');
                 } else if (data.type === 'comparison_result') {
                     // Display the comparison result
                     comparisonContent.innerHTML = data.message;
-                    
+
                     // Hide processing section and show result container
                     processingSection.classList.add('hidden');
                     resultContainer.classList.remove('hidden');
-                    
+
                     // Add completed notification
                     addNotification('Comparison completed! Results displayed below.', 'green');
-                    
+
                     // Scroll to the results
                     resultContainer.scrollIntoView({ behavior: 'smooth' });
                 }
             };
-            
-            socket.onclose = function(e) {
+
+            // Your original onclose handler
+            activeSocket.onclose = function(e) {
                 if (e.wasClean) {
                     addNotification(`Connection closed cleanly, code=${e.code}`, 'gray');
                 } else {
                     addNotification('Connection lost. Please refresh the page.', 'red');
                 }
             };
-            
-            socket.onerror = function(e) {
+
+            // Your original onerror handler
+            activeSocket.onerror = function(e) {
                 addNotification('WebSocket error. Please refresh the page.', 'red');
             };
-            
-            function addNotification(message, color) {
-                const colorClasses = {
-                    'blue': 'bg-blue-50 text-blue-700',
-                    'green': 'bg-green-50 text-green-700',
-                    'red': 'bg-red-50 text-red-700',
-                    'yellow': 'bg-yellow-50 text-yellow-700',
-                    'gray': 'bg-gray-50 text-gray-700'
-                };
-                
-                const notificationDiv = document.createElement('div');
-                notificationDiv.className = `p-3 rounded ${colorClasses[color] || colorClasses['blue']}`;
-                notificationDiv.innerHTML = message;
-                
-                notificationContainer.appendChild(notificationDiv);
-                notificationContainer.scrollTop = notificationContainer.scrollHeight;
-            }
-        });
-    </script>
+        }
+
+        // Create the socket connection with fallback capability
+        const socket = createComparisonSocketWithFallback();
+
+        function addNotification(message, color) {
+            const colorClasses = {
+                'blue': 'bg-blue-50 text-blue-700',
+                'green': 'bg-green-50 text-green-700',
+                'red': 'bg-red-50 text-red-700',
+                'yellow': 'bg-yellow-50 text-yellow-700',
+                'gray': 'bg-gray-50 text-gray-700'
+            };
+
+            const notificationDiv = document.createElement('div');
+            notificationDiv.className = `p-3 rounded ${colorClasses[color] || colorClasses['blue']}`;
+            notificationDiv.innerHTML = message;
+
+            notificationContainer.appendChild(notificationDiv);
+            notificationContainer.scrollTop = notificationContainer.scrollHeight;
+        }
+    });
+</script>
 </body>
 </html> 

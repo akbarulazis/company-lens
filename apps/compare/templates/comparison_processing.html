@@ -204,7 +204,7 @@
         // Enhanced WebSocket creation with fallback to port 8001
         function createComparisonSocketWithFallback() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-            const primaryUrl = `${protocol}//${window.location.host}/ws/notifications/`;
+            const primaryUrl = `${protocol}//${window.location.hostname}:8001/ws/notifications/`;
             console.log("Attempting primary comparison WebSocket connection:", primaryUrl);
 
             let currentSocket = new WebSocket(primaryUrl);

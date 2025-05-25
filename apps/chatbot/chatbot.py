@@ -30,11 +30,11 @@ class ChatbotRAG:
             # If we haven't loaded company data yet, do it now
             if self.company_data is None or self.company_embeddings is None:
                 self._prepare_company_data()
-            
+
             # Get workspace and companies for logging
             workspace = Workspace.objects.get(id=self.workspace_id)
             companies = CompanyProfile.objects.filter(workspace=workspace)
-            
+
             # Log information about the companies found
             logger.info(f"Found {companies.count()} companies in workspace {workspace.name}")
             for company in companies:
@@ -327,14 +327,14 @@ class ChatbotRAG:
             
             # Get context with company information
             context = self.get_context(query)
-            
+
             # Log if context is empty or very short
             if not context or len(context) < 50:
                 logger.warning(f"Context is very short or empty: '{context}'")
             
             # Get chat history
             history = self.get_chat_history()
-            
+
             # Check if we have any companies in the workspace
             company_count = companies.count()
             logger.info(f"Found {company_count} companies in workspace {workspace.name}")
@@ -381,7 +381,7 @@ Use the context provided to answer questions about these companies.
 Do NOT respond that you can only answer questions about companies in the workspace - you already have that information."""
 
             logger.info(f"Sending request to OpenAI with prompt length: {len(prompt)}")
-            
+
             response = client.chat.completions.create(
                 model=self.model,
                 messages=[

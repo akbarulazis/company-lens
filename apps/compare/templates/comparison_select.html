@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Compare Companies | Company Lens</title>
+    <title>Compare Companies | Company Lens</title>
     <link href="{% static 'output.css' %}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -23,7 +23,7 @@
     <div class="container mx-auto px-4 py-8 max-w-6xl">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
             <div>
-                <h1 class="text-4xl font-bold mb-2 text-blue-600">AI Company Comparison <span class="ai-badge"><i class="fas fa-robot mr-1"></i>AI</span></h1>
+                <h1 class="text-4xl font-bold mb-2 text-blue-600">Company Comparison</h1>
                 <p class="text-gray-600">Select companies from workspace "{{ workspace.name }}" to compare</p>
             </div>
             <div class="mt-4 md:mt-0">
@@ -64,7 +64,7 @@
                     <p>Only companies with complete profiles can be compared. If a company you want to compare is missing, please ensure its profile has been generated.</p>
                 </div>
 
-                <form method="POST" action="{% url 'simple_compare' workspace.id %}">
+                <form method="POST" action="{% url 'compare' workspace.id %}">
                     {% csrf_token %}
                     <div class="mb-6">
                         <label class="block text-gray-700 font-medium mb-3">Select companies to compare:</label>
@@ -111,10 +111,10 @@
                     </div>
 
                     <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg inline-flex items-center w-full justify-center">
-                        Generate AI Comparison
+                        <i class="fas fa-bolt mr-2"></i> Generate AI Comparison
                     </button>
 
-                    <div class="bg-blue-50 text-blue-700 p-5 rounded-lg mb-6">
+                    <div class="bg-blue-50 text-blue-700 p-5 rounded-lg mt-6">
                         <h5 class="font-semibold flex items-center mb-3">
                             <i class="fas fa-robot mr-2"></i>AI-Powered Comparison
                         </h5>
@@ -125,7 +125,8 @@
                             <li>Side-by-side score comparisons</li>
                             <li>Investment recommendations</li>
                         </ul>
-                        <p class="text-sm">The comparison is generated instantly using our AI model.</p>
+                        
+                        <p class="text-sm">The comparison is processed in the background with real-time updates.</p>
                     </div>
 
                 </form>

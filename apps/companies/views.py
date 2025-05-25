@@ -61,16 +61,41 @@ class DeleteCompanyView(LoginRequiredMixin, View):
     def post(self, request, workspace_id, company_name):
         workspace = get_object_or_404(Workspace, id=workspace_id, user=request.user)
         profile = get_object_or_404(CompanyProfile, company_name=company_name, workspace=workspace)
-        company = get_object_or_404(Company,name=company_name)
+        
+        # Instead of get_object_or_404, use filter to handle multiple companies with same name
+        # and get the specific company linked to this workspace
+        try:
+            # Get the specific WorkspaceCompany entry for this workspace and company name
+            workspace_company = WorkspaceCompany.objects.filter(
+                workspace=workspace,
+                company__name=company_name
+            ).first()
+            
+            if workspace_company:
+                company = workspace_company.company
+            else:
+                # Fallback: Try to find any company with this name
+                company = Company.objects.filter(name=company_name).first()
+                
+            # First delete any document chunks that reference this company
+            # Import here to avoid circular import
+            from apps.chatbot.models import DocumentChunk
+            DocumentChunk.objects.filter(company=profile).delete()
 
-        # First delete any document chunks that reference this company
-        # Import here to avoid circular import
-        from apps.chatbot.models import DocumentChunk
-        DocumentChunk.objects.filter(company=profile).delete()
+            # Delete the profile
+            profile.delete()
+            
+            # Delete the workspace-company relationship
+            if workspace_company:
+                workspace_company.delete()
+                
+            # Only delete the company if no other workspace is using it
+            if company and not WorkspaceCompany.objects.filter(company=company).exists():
+                company.delete()
 
-        # Now safe to delete the profile and company
-        profile.delete()
-        company.delete()
-
-        messages.success(request, f"Company '{company_name}' has been removed from workspace")
+            messages.success(request, f"Company '{company_name}' has been removed from workspace")
+            
+        except Exception as e:
+            messages.error(request, f"Error removing company: {str(e)}")
+            
         return redirect('workspace_detail', pk=workspace_id)

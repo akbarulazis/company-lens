@@ -25,7 +25,7 @@ class ChatbotRAG:
         self.company_data = None
         self.company_embeddings = None
 
-    def get_context(self, query):
+    def get_context(self, query, user=None):
         try:
             # If we haven't loaded company data yet, do it now
             if self.company_data is None or self.company_embeddings is None:
@@ -65,70 +65,23 @@ class ChatbotRAG:
                 logger.warning("No companies found in workspace")
                 return "No companies found in this workspace."
 
-            context = "COMPANY INFORMATION:\n\n"
+            # Add user profile information to context
+            context = ""
+            if user:
+                context += "USER PROFILE INFORMATION:\n\n"
+                context += f"User: {user.first_name} {user.last_name}\n"
+                context += f"Username: {user.username}\n"
+                context += f"Email: {user.email}\n"
+                context += f"Workspace: {workspace.name}\n"
+                if workspace.description:
+                    context += f"Workspace Description: {workspace.description}\n"
+                context += "\n"
+
+            context += "COMPANY INFORMATION:\n\n"
             for company in companies:
                 context += f"Company: {company.company_name}\n"
                 context += f"Industry: {company.industry or 'Not specified'}\n"
-                context += f"Profile: {company.profile_content[:1000] if company.profile_content else 'No profile available'}...\n\n"
-
-                if company.founded_year or company.headquarters or company.employee_count:
-                    context += "Company Details:\n"
-                    if company.founded_year:
-                        context += f"- Founded: {company.founded_year}\n"
-                    if company.headquarters:
-                        context += f"- Headquarters: {company.headquarters}\n"
-                    if company.employee_count:
-                        context += f"- Employees: {company.employee_count}\n"
-                    context += "\n"
-
-                if company.market_cap or company.annual_revenue or company.funding_total:
-                    context += "Financial Data:\n"
-                    if company.market_cap:
-                        context += f"- Market Cap: {company.market_cap}\n"
-                    if company.annual_revenue:
-                        context += f"- Annual Revenue: {company.annual_revenue}\n"
-                    if company.funding_total:
-                        context += f"- Total Funding: {company.funding_total}\n"
-                    context += "\n"
-
-                if company.overall_score > 0:
-                    context += "Investment Scores:\n"
-                    context += f"- Overall: {company.overall_score}\n"
-                    context += f"- Financial Health: {company.financial_health_score}\n"
-                    context += f"- Business Risk: {company.business_risk_score}\n"
-                    context += f"- Growth Potential: {company.growth_potential_score}\n"
-                    context += f"- Industry Position: {company.industry_position_score}\n"
-                    context += f"- External Trends: {company.external_trends_score}\n"
-                    context += "\n"
-
-                competitors = company.competitors.all()
-                if competitors:
-                    context += "Competitors:\n"
-                    for competitor in competitors:
-                        context += f"- {competitor.competitor_name}\n"
-                    context += "\n"
-
-                executives = company.executives.all()
-                if executives:
-                    context += "Executive Team:\n"
-                    for exec in executives:
-                        context += f"- {exec.name} ({exec.position})\n"
-                    context += "\n"
-
-                funding_rounds = company.funding_rounds.all()
-                if funding_rounds:
-                    context += "Funding History:\n"
-                    for round in funding_rounds:
-                        context += f"- {round.round_type}: {round.amount} ({round.date})\n"
-                    context += "\n"
-
-                documents = company.documents.all()
-                if documents:
-                    context += "Document Key Points:\n"
-                    for doc in documents:
-                        if doc.key_points:
-                            context += f"Document: {doc.title} ({doc.document_type})\n"
-                            context += f"Key Points: {doc.key_points[:500]}...\n\n"
+                context += f"Profile Content: {company.profile_content if company.profile_content else 'No profile available'}\n\n"
 
             # Log the first part of the context to check it's not empty
             logger.info(f"Context preview: {context[:200]}...")
@@ -151,77 +104,30 @@ class ChatbotRAG:
             
             # Create chunks from company data
             for company in companies:
-                # Basic company info
+                # Only use company name, industry, and profile content
                 chunk = f"Company: {company.company_name}\n"
                 chunk += f"Industry: {company.industry or 'Not specified'}\n"
-                chunk += f"Profile: {company.profile_content[:1000] if company.profile_content else 'No profile available'}\n"
-                self.company_data.append(chunk)
                 
-                # Company details
-                if company.founded_year or company.headquarters or company.employee_count:
-                    chunk = f"Company: {company.company_name} - Details\n"
-                    if company.founded_year:
-                        chunk += f"Founded: {company.founded_year}\n"
-                    if company.headquarters:
-                        chunk += f"Headquarters: {company.headquarters}\n"
-                    if company.employee_count:
-                        chunk += f"Employees: {company.employee_count}\n"
+                # Split profile content into smaller chunks if it's large
+                if company.profile_content:
+                    # If profile content is very long, split it into chunks of ~1000 characters
+                    profile_content = company.profile_content
+                    if len(profile_content) > 1500:
+                        # Process content in chunks
+                        for i in range(0, len(profile_content), 1000):
+                            content_chunk = profile_content[i:i+1000]
+                            section_chunk = f"Company: {company.company_name}\n"
+                            section_chunk += f"Industry: {company.industry or 'Not specified'}\n"
+                            section_chunk += f"Profile Content (Part {i//1000 + 1}): {content_chunk}\n"
+                            self.company_data.append(section_chunk)
+                    else:
+                        # Small enough to be one chunk
+                        chunk += f"Profile Content: {profile_content}\n"
+                        self.company_data.append(chunk)
+                else:
+                    # No profile content
+                    chunk += "Profile Content: No profile available\n"
                     self.company_data.append(chunk)
-                
-                # Financial data
-                if company.market_cap or company.annual_revenue or company.funding_total:
-                    chunk = f"Company: {company.company_name} - Financial Data\n"
-                    if company.market_cap:
-                        chunk += f"Market Cap: {company.market_cap}\n"
-                    if company.annual_revenue:
-                        chunk += f"Annual Revenue: {company.annual_revenue}\n"
-                    if company.funding_total:
-                        chunk += f"Total Funding: {company.funding_total}\n"
-                    self.company_data.append(chunk)
-                
-                # Investment scores
-                if company.overall_score > 0:
-                    chunk = f"Company: {company.company_name} - Investment Scores\n"
-                    chunk += f"Overall Score: {company.overall_score}\n"
-                    chunk += f"Financial Health: {company.financial_health_score}\n"
-                    chunk += f"Business Risk: {company.business_risk_score}\n"
-                    chunk += f"Growth Potential: {company.growth_potential_score}\n"
-                    chunk += f"Industry Position: {company.industry_position_score}\n"
-                    chunk += f"External Trends: {company.external_trends_score}\n"
-                    self.company_data.append(chunk)
-                
-                # Competitors
-                competitors = company.competitors.all()
-                if competitors:
-                    chunk = f"Company: {company.company_name} - Competitors\n"
-                    for competitor in competitors:
-                        chunk += f"- {competitor.competitor_name}\n"
-                    self.company_data.append(chunk)
-                
-                # Executive team
-                executives = company.executives.all()
-                if executives:
-                    chunk = f"Company: {company.company_name} - Executive Team\n"
-                    for exec in executives:
-                        chunk += f"- {exec.name} ({exec.position})\n"
-                    self.company_data.append(chunk)
-                
-                # Funding history
-                funding_rounds = company.funding_rounds.all()
-                if funding_rounds:
-                    chunk = f"Company: {company.company_name} - Funding History\n"
-                    for round in funding_rounds:
-                        chunk += f"- {round.round_type}: {round.amount} ({round.date})\n"
-                    self.company_data.append(chunk)
-                
-                # Documents
-                documents = company.documents.all()
-                if documents:
-                    for doc in documents:
-                        if doc.key_points:
-                            chunk = f"Company: {company.company_name} - Document: {doc.title} ({doc.document_type})\n"
-                            chunk += f"Key Points: {doc.key_points[:1000]}\n"
-                            self.company_data.append(chunk)
             
             logger.info(f"Created {len(self.company_data)} data chunks")
             
@@ -317,7 +223,7 @@ class ChatbotRAG:
             logger.error(f"Error getting chat history: {str(e)}", exc_info=True)
             return ""
 
-    def generate_response(self, query):
+    def generate_response(self, query, user=None):
         try:
             logger.info(f"Generating response for query: '{query}'")
             
@@ -325,8 +231,8 @@ class ChatbotRAG:
             workspace = Workspace.objects.get(id=self.workspace_id)
             companies = CompanyProfile.objects.filter(workspace=workspace)
             
-            # Get context with company information
-            context = self.get_context(query)
+            # Get context with company and user information
+            context = self.get_context(query, user)
 
             # Log if context is empty or very short
             if not context or len(context) < 50:
@@ -346,23 +252,32 @@ class ChatbotRAG:
             # Create a list of company names for the system message
             company_names = ", ".join([company.company_name for company in companies])
             
-            prompt = f"""You are a specialized AI assistant focused on providing information about companies in the user's workspace.
-Your sole purpose is to answer questions based on the company information provided.
+            # Create user context string for the prompt
+            user_context = ""
+            if user:
+                user_context = f"You are assisting {user.first_name} {user.last_name} (@{user.username}) in their workspace '{workspace.name}'. "
+                if workspace.description:
+                    user_context += f"This workspace is described as: {workspace.description}. "
+
+            prompt = f"""{user_context}You are a specialized AI assistant focused on providing information about companies in the user's workspace.
+Your sole purpose is to answer questions based on the company profile content provided.
 
 IMPORTANT RULES:
 1. The companies in the workspace are: {company_names}
-2. You should answer the user's question using ONLY the information in the context provided below.
-3. Do NOT make up or hallucinate any information that's not in the context.
-4. If you don't have enough information in the context to answer fully, acknowledge the limitations in your knowledge.
+2. You should answer the user's question using ONLY the information in the profile content provided in the context below.
+3. Do NOT make up or hallucinate any information that's not in the profile content.
+4. If you don't have enough information in the profile content to answer fully, acknowledge the limitations in your knowledge.
 5. Do NOT say that you can only provide information about companies in the workspace - you already have company information.
 6. If the user asks about a topic unrelated to the companies in the workspace, explain that you can help with questions about {company_names}.
+7. You can personalize your responses by referring to the user by their first name when appropriate.
+8. Focus on extracting relevant information from the company profile content to answer questions.
 
 FORMAT INSTRUCTIONS:
 1. Use clear section headings with "### " prefix for major sections.
 2. Make company names and important terms bold with ** markdown (e.g., **{company_names}**).
 3. Use proper numbered lists for sequential items and bullet points for non-sequential items.
 4. Structure your content with clear paragraphs, leaving empty lines between sections.
-5. When listing features or characteristics, use a numbered format with descriptive titles.
+# 5. When listing features or characteristics, use a numbered format with descriptive titles.
 
 Recent conversation:
 {history}
@@ -374,11 +289,13 @@ User Question: {query}
 
 Answer:"""
 
-            system_message = f"""You are a helpful assistant specialized in company research and financial analysis. 
+            system_message = f"""You are a helpful assistant specialized in analyzing company profile information. 
 Format your responses with clear structure and markdown formatting for readability. 
-The workspace contains information about these companies: {company_names}. 
-Use the context provided to answer questions about these companies.
-Do NOT respond that you can only answer questions about companies in the workspace - you already have that information."""
+The workspace contains profile content for these companies: {company_names}. 
+Use the profile content provided in the context to answer questions about these companies.
+{f"You are assisting {user.first_name} {user.last_name} - personalize your responses when appropriate." if user else ""}
+Do NOT respond that you can only answer questions about companies in the workspace - you already have that information.
+Focus on providing insights based on the company profile content only."""
 
             logger.info(f"Sending request to OpenAI with prompt length: {len(prompt)}")
 

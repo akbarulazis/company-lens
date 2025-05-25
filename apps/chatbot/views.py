@@ -58,8 +58,8 @@ def chat_message(request, workspace_id):
             # Save the user message
             chatbot.save_message(request.user, message)
 
-            # Generate a response
-            response = chatbot.generate_response(message)
+            # Generate a response with user context
+            response = chatbot.generate_response(message, request.user)
             
             # Check if the response has the default rejection pattern
             if "I can only provide information about" in response and "companies in the workspace" in response:
@@ -67,9 +67,9 @@ def chat_message(request, workspace_id):
                 # Create a better response
                 company_names = ", ".join([company.company_name for company in companies])
                 if companies.count() > 0:
-                    response = f"""I have information about the following companies: {company_names}. 
+                    response = f"""I have profile content for the following companies: {company_names}. 
                     
-What specific details would you like to know about these companies? I can provide information about their industry, financial data, executives, and more."""
+What would you like to know about these companies based on their profile content?"""
 
             # Save the assistant message
             chatbot.save_message(request.user, response, is_user_message=False)

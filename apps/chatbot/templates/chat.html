@@ -150,7 +150,7 @@
                                             <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                                             <span class="text-sm font-medium text-gray-500">Assistant</span>
                                         </div>
-                                        <p>Hello! I'm your company research assistant. I can help answer questions about your companies. What would you like to know?</p>
+                                        <p>Hello {% if user.first_name %}{{ user.first_name }}{% endif %}! I'm your personalized company research assistant. I can help answer questions based on the profile content of your companies in the "{{ workspace.name }}" workspace. What would you like to know?</p>
                                     </div>
                                 </div>
                             {% endif %}
@@ -187,16 +187,16 @@
                                 <p class="text-sm text-gray-500 mb-3">Suggested questions:</p>
                                 <div class="flex flex-wrap gap-2">
                                     <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
-                                        What are the key risks for these companies?
+                                        What can you tell me about these companies?
                                     </button>
                                     <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
-                                        Which company has the best growth potential?
+                                        Summarize the profile content for each company.
                                     </button>
                                     <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
-                                        Compare the financial health of these companies.
+                                        Compare the main points from each company profile.
                                     </button>
                                     <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors suggestion-btn" onclick="askSuggestion(this)">
-                                        What are the recent market trends affecting these companies?
+                                        Extract key insights from the profile content.
                                     </button>
                                 </div>
                             </div>
@@ -205,7 +205,7 @@
                 </div>
             </div>
 
-            <!-- Companies Sidebar -->
+                        <!-- Companies Sidebar -->
             <div class="lg:col-span-1">
                 <div class="bg-white rounded-lg shadow-md sticky top-6">
                     <div class="px-6 py-4 border-b border-gray-100">

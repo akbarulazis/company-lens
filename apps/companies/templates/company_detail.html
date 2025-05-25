@@ -199,8 +199,7 @@
 
         <!-- Improved Company Profile Content -->
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <div class="flex items-center mb-8">
-                <i class="fas fa-building text-blue-600 text-2xl mr-3"></i>
+            <div class="flex items-center mb-6">
                 <h2 class="text-2xl font-semibold text-gray-800">Company Profile</h2>
             </div>
 
@@ -390,15 +389,11 @@
                         const sectionNumber = index + 1;
 
                         return `
-                            <div class="content-section bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300">
+                            <div class="content-section bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-md transition-all duration-300 mb-6">
                                 <div class="section-header text-white p-4 rounded-t-lg">
                                     <div class="flex items-center">
-                                        <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center mr-3">
-                                            <i class="${icon} text-white"></i>
-                                        </div>
                                         <div>
-                                            <span class="text-sm font-medium opacity-90">${sectionNumber}.</span>
-                                            <h3 class="text-lg font-semibold">${title}</h3>
+                                            <h3 class="text-lg font-semibold">${sectionNumber}. ${title}</h3>
                                         </div>
                                     </div>
                                 </div>
@@ -439,6 +434,13 @@
                             /\b(Founded|Established|Headquarters|Employees|Revenue|Profit|Assets|CEO|Chairman)\b/gi,
                             '<span class="font-semibold text-gray-800">$1</span>'
                         );
+                        
+                        // Improve paragraph spacing
+                        processedText = processedText.replace(/\n\n/g, '</p><p class="mb-4">');
+                        processedText = '<p class="mb-4">' + processedText + '</p>';
+                        
+                        // Remove any empty paragraphs
+                        processedText = processedText.replace(/<p class="mb-4"><\/p>/g, '');
 
                         return processedText;
                     }
@@ -451,12 +453,12 @@
                         if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
                             const text = node.textContent.trim();
                             // Check if this looks like a section header (contains numbers and uppercase)
-                            if (/^\d+\.\s*[A-Z\s&]+$/.test(text)) {
+                            if (/^\d+\.?\s*[A-Z\s&]+$/.test(text)) {
                                 if (currentSection.title) {
                                     sections.push(currentSection);
                                 }
                                 currentSection = {
-                                    title: text.replace(/^\d+\.\s*/, ''),
+                                    title: text.replace(/^\d+\.?\s*/, ''),
                                     content: ''
                                 };
                             } else {
@@ -468,7 +470,7 @@
                                     sections.push(currentSection);
                                 }
                                 currentSection = {
-                                    title: node.textContent.replace(/^\d+\.\s*/, ''),
+                                    title: node.textContent.replace(/^\d+\.?\s*/, ''),
                                     content: ''
                                 };
                             } else {

@@ -47,7 +47,6 @@
     --color-white: #fff;
     --spacing: 0.25rem;
     --container-xs: 20rem;
-    --container-sm: 24rem;
     --container-md: 28rem;
     --container-lg: 32rem;
     --container-3xl: 48rem;
@@ -248,9 +247,6 @@
   .sticky {
     position: sticky;
   }
-  .inset-0 {
-    inset: calc(var(--spacing) * 0);
-  }
   .top-0 {
     top: calc(var(--spacing) * 0);
   }
@@ -292,9 +288,6 @@
     @media (width >= 96rem) {
       max-width: 96rem;
     }
-  }
-  .mx-4 {
-    margin-inline: calc(var(--spacing) * 4);
   }
   .mx-auto {
     margin-inline: auto;
@@ -401,14 +394,8 @@
   .h-2 {
     height: calc(var(--spacing) * 2);
   }
-  .h-4 {
-    height: calc(var(--spacing) * 4);
-  }
   .h-5 {
     height: calc(var(--spacing) * 5);
-  }
-  .h-10 {
-    height: calc(var(--spacing) * 10);
   }
   .h-12 {
     height: calc(var(--spacing) * 12);
@@ -428,20 +415,11 @@
   .max-h-full {
     max-height: 100%;
   }
-  .min-h-screen {
-    min-height: 100vh;
-  }
   .w-2 {
     width: calc(var(--spacing) * 2);
   }
-  .w-4 {
-    width: calc(var(--spacing) * 4);
-  }
   .w-5 {
     width: calc(var(--spacing) * 5);
-  }
-  .w-10 {
-    width: calc(var(--spacing) * 10);
   }
   .w-12 {
     width: calc(var(--spacing) * 12);
@@ -470,12 +448,6 @@
   .max-w-md {
     max-width: var(--container-md);
   }
-  .max-w-none {
-    max-width: none;
-  }
-  .max-w-sm {
-    max-width: var(--container-sm);
-  }
   .max-w-xs {
     max-width: var(--container-xs);
   }
@@ -500,8 +472,8 @@
   .resize {
     resize: both;
   }
-  .list-inside {
-    list-style-position: inside;
+  .list-outside {
+    list-style-position: outside;
   }
   .list-decimal {
     list-style-type: decimal;
@@ -545,13 +517,6 @@
   .gap-6 {
     gap: calc(var(--spacing) * 6);
   }
-  .space-y-1 {
-    :where(& > :not(:last-child)) {
-      --tw-space-y-reverse: 0;
-      margin-block-start: calc(calc(var(--spacing) * 1) * var(--tw-space-y-reverse));
-      margin-block-end: calc(calc(var(--spacing) * 1) * calc(1 - var(--tw-space-y-reverse)));
-    }
-  }
   .space-y-3 {
     :where(& > :not(:last-child)) {
       --tw-space-y-reverse: 0;
@@ -573,16 +538,6 @@
       margin-block-end: calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));
     }
   }
-  .space-y-8 {
-    :where(& > :not(:last-child)) {
-      --tw-space-y-reverse: 0;
-      margin-block-start: calc(calc(var(--spacing) * 8) * var(--tw-space-y-reverse));
-      margin-block-end: calc(calc(var(--spacing) * 8) * calc(1 - var(--tw-space-y-reverse)));
-    }
-  }
-  .gap-x-6 {
-    column-gap: calc(var(--spacing) * 6);
-  }
   .space-x-1 {
     :where(& > :not(:last-child)) {
       --tw-space-x-reverse: 0;
@@ -603,9 +558,6 @@
       margin-inline-start: calc(calc(var(--spacing) * 3) * var(--tw-space-x-reverse));
       margin-inline-end: calc(calc(var(--spacing) * 3) * calc(1 - var(--tw-space-x-reverse)));
     }
-  }
-  .gap-y-4 {
-    row-gap: calc(var(--spacing) * 4);
   }
   .truncate {
     overflow: hidden;
@@ -676,9 +628,6 @@
     border-left-style: var(--tw-border-style);
     border-left-width: 4px;
   }
-  .border-blue-100 {
-    border-color: var(--color-blue-100);
-  }
   .border-blue-600 {
     border-color: var(--color-blue-600);
   }
@@ -706,6 +655,9 @@
   .bg-blue-100 {
     background-color: var(--color-blue-100);
   }
+  .bg-blue-500 {
+    background-color: var(--color-blue-500);
+  }
   .bg-blue-600 {
     background-color: var(--color-blue-600);
   }
@@ -720,9 +672,6 @@
   }
   .bg-gray-400 {
     background-color: var(--color-gray-400);
-  }
-  .bg-gray-900 {
-    background-color: var(--color-gray-900);
   }
   .bg-green-50 {
     background-color: var(--color-green-50);
@@ -768,9 +717,6 @@
   }
   .p-1\.5 {
     padding: calc(var(--spacing) * 1.5);
-  }
-  .p-2 {
-    padding: calc(var(--spacing) * 2);
   }
   .p-3 {
     padding: calc(var(--spacing) * 3);
@@ -819,9 +765,6 @@
   }
   .ps-0 {
     padding-inline-start: calc(var(--spacing) * 0);
-  }
-  .pb-2 {
-    padding-bottom: calc(var(--spacing) * 2);
   }
   .pl-4 {
     padding-left: calc(var(--spacing) * 4);
@@ -906,9 +849,6 @@
   .text-gray-800 {
     color: var(--color-gray-800);
   }
-  .text-green-600 {
-    color: var(--color-green-600);
-  }
   .text-green-700 {
     color: var(--color-green-700);
   }
@@ -944,9 +884,6 @@
   }
   .opacity-60 {
     opacity: 60%;
-  }
-  .opacity-90 {
-    opacity: 90%;
   }
   .shadow {
     --tw-shadow: 0 1px 3px 0 var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 1px 2px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1));

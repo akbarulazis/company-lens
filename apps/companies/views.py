@@ -63,6 +63,12 @@ class DeleteCompanyView(LoginRequiredMixin, View):
         profile = get_object_or_404(CompanyProfile, company_name=company_name, workspace=workspace)
         company = get_object_or_404(Company,name=company_name)
 
+        # First delete any document chunks that reference this company
+        # Import here to avoid circular import
+        from apps.chatbot.models import DocumentChunk
+        DocumentChunk.objects.filter(company=profile).delete()
+
+        # Now safe to delete the profile and company
         profile.delete()
         company.delete()
 

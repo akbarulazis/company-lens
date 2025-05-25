@@ -38,7 +38,67 @@
         .chat-scroll::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
+        
+        /* Enhanced chat message styling */
+        .chat-message h3 {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 0.25rem;
+        }
+        
+        .chat-message ul, .chat-message ol {
+            margin-left: 0.5rem;
+        }
+        
+        .chat-message p {
+            margin-bottom: 0.75rem;
+        }
+        
+        .chat-message strong {
+            color: #1e40af;
+        }
     </style>
+    <script>
+        // Format content function for chat messages
+        function formatContent(content) {
+            // Convert markdown headings to HTML (### Heading)
+            content = content.replace(/###\s+(.*?)(?=\n|$)/g, '<h3 class="text-lg font-bold text-gray-800 mt-4 mb-2">$1</h3>');
+            
+            // Convert markdown bold to HTML
+            content = content.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold">$1</strong>');
+
+            // Convert markdown italic to HTML
+            content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            
+            // Format numbered lists with sections (1. **Bold Title** - Description)
+            content = content.replace(/(\d+\.\s+)(?:\*\*(.*?)\*\*\s*-\s*(.*?)(?=\n\d+\.|\n\n|$))/gs, 
+                '<li class="mb-3"><div class="font-semibold">$1 $2</div><div class="ml-4 text-gray-600">$3</div></li>');
+            
+            // Format regular numbered lists (1. Item)
+            content = content.replace(/(\d+\.\s+((?!\*\*).)*?)(?=\n\d+\.|\n\n|$)/gs, '<li class="ml-4 mb-2">$1</li>');
+            content = content.replace(/(<li[^>]*>.*?<\/li>)+/gs, '<ol class="list-decimal list-outside mb-4 pl-4">$&</ol>');
+
+            // Format bullet lists (• Item or - Item)
+            content = content.replace(/([•\-]\s+((?!\*\*).)*?)(?=\n[•\-]|\n\n|$)/gs, '<li class="ml-4 mb-2">$1</li>');
+            content = content.replace(/(<li[^>]*>[•\-].*?<\/li>)+/gs, '<ul class="list-disc list-outside mb-4 pl-4">$&</ul>');
+            content = content.replace(/<li[^>]*>([•\-])\s*(.*?)<\/li>/g, '<li class="ml-4 mb-2">$2</li>');
+
+            // Add paragraph spacing for double line breaks
+            content = content.replace(/\n\n/g, '</p><p class="mb-3">');
+            
+            // Add spacing after headings if not followed by a paragraph
+            content = content.replace(/<\/h3>\n(?!<p)/g, '</h3><p class="mb-3">');
+            
+            // Format single line breaks not after headings or lists
+            content = content.replace(/(?<!<\/h3>|<\/li>)\n(?!<h3|<\/p>|<p|<ol|<ul|<li)/g, '<br>');
+
+            // Wrap in paragraph if not already wrapped
+            if (!content.includes('<p') && !content.includes('<ol') && !content.includes('<ul') && !content.includes('<h3')) {
+                content = '<p class="mb-3">' + content + '</p>';
+            }
+
+            return content;
+        }
+    </script>
 </head>
 <body class="bg-gray-50">
     <div class="container mx-auto px-4 py-8 max-w-7xl">
@@ -67,7 +127,19 @@
                                 {% for message in chat_history %}
                                     <div class="mb-4 flex {% if message.is_user_message %}justify-end{% else %}justify-start{% endif %}">
                                         <div class="max-w-xs lg:max-w-md px-4 py-3 rounded-lg {% if message.is_user_message %}bg-blue-600 text-white rounded-br-none{% else %}bg-white text-gray-800 rounded-bl-none shadow-sm border{% endif %}">
-                                            {{ message.message }}
+                                            {% if message.is_user_message %}
+                                                {{ message.message }}
+                                            {% else %}
+                                                <div class="flex items-center mb-2">
+                                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                                    <span class="text-sm font-medium text-gray-500">Assistant</span>
+                                                </div>
+                                                <div class="chat-message">
+                                                    <script>
+                                                        document.write(formatContent(`{{ message.message|escapejs }}`));
+                                                    </script>
+                                                </div>
+                                            {% endif %}
                                         </div>
                                     </div>
                                 {% endfor %}
@@ -275,6 +347,7 @@
 
                     // Format and add content
                     const contentDiv = document.createElement('div');
+                    contentDiv.classList.add('chat-message');
                     contentDiv.innerHTML = formatContent(content);
                     messageDiv.appendChild(contentDiv);
                 }
@@ -285,36 +358,6 @@
                 chatMessages.insertBefore(messageWrapper, typingIndicator);
 
                 scrollToBottom();
-            }
-
-            function formatContent(content) {
-                // Convert markdown bold to HTML
-                content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-                // Convert markdown italic to HTML
-                content = content.replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-                // Add proper line breaks
-                content = content.replace(/\n/g, '<br>');
-
-                // Format numbered lists (1. Item)
-                content = content.replace(/(\d+\.\s.*?)(?=\n\d+\.|\n\n|$)/gs, '<li class="ml-4 mb-1">$1</li>');
-                content = content.replace(/(<li[^>]*>.*?<\/li>)+/gs, '<ol class="list-decimal list-inside mb-2">$&</ol>');
-
-                // Format bullet lists (• Item or - Item)
-                content = content.replace(/([•\-]\s.*?)(?=\n[•\-]|\n\n|$)/gs, '<li class="ml-4 mb-1">$1</li>');
-                content = content.replace(/(<li[^>]*>[•\-].*?<\/li>)+/gs, '<ul class="list-disc list-inside mb-2">$&</ul>');
-                content = content.replace(/<li[^>]*>([•\-])\s*(.*?)<\/li>/g, '<li class="ml-4 mb-1">$2</li>');
-
-                // Add paragraph spacing for double line breaks
-                content = content.replace(/\n\n/g, '</p><p class="mb-2">');
-
-                // Wrap in paragraph if not already wrapped
-                if (!content.includes('<p>') && !content.includes('<ol>') && !content.includes('<ul>')) {
-                    content = '<p class="mb-2">' + content + '</p>';
-                }
-
-                return content;
             }
 
             function scrollToBottom() {
@@ -345,7 +388,7 @@
             chatInput.value = `Tell me about ${companyName}`;
             chatInput.focus();
             // Add a small visual feedback
-            const companyCal = event.target.closest('.company-card');
+            const companyCard = event.target.closest('.company-card');
             if (companyCard) {
                 companyCard.classList.add('ring-2', 'ring-blue-500');
                 setTimeout(() => {

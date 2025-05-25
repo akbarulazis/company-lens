@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Comparison | Company Lens</title>
+    <link href="{% static 'output.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .pulse-animation {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        #notification-container {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        /* Styles for comparison content */
+        .comparison-content h1 {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2563eb;
+            margin-bottom: 1.5rem;
+        }
+        
+        .comparison-content h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: #1e40af;
+            margin: 1.5rem 0 1rem 0;
+        }
+        
+        .comparison-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #3730a3;
+            margin: 1rem 0 0.5rem 0;
+        }
+        
+        .comparison-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .comparison-content th,
+        .comparison-content td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .comparison-content th {
+            background-color: #f3f4f6;
+            font-weight: 600;
+        }
+        
+        .comparison-content p {
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+        
+        .comparison-content ul {
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .comparison-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .error-message {
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            color: #374151;
+            background-color: white;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+            <div>
+                <h1 class="text-4xl font-bold mb-2 text-blue-600">Company Comparison</h1>
+                <p class="text-gray-600">Workspace: {{ workspace.name }}</p>
+            </div>
+            <div class="mt-4 md:mt-0">
+                <a href="{% url 'workspace_detail' workspace.id %}"
+                   class="btn-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Workspace
+                </a>
+            </div>
+        </div>
+
+        <!-- Messages section -->
+        {% if messages %}
+            <div id="messages-container">
+                {% for message in messages %}
+                    <div class="mb-6 p-4 rounded-lg {% if message.tags == 'success' %}bg-green-50 text-green-700{% elif message.tags == 'error' %}bg-red-50 text-red-700{% elif message.tags == 'warning' %}bg-yellow-50 text-yellow-700{% elif message.tags == 'info' %}bg-blue-50 text-blue-700{% endif %} relative">
+                        {{ message }}
+                        <button type="button" class="absolute top-4 right-4" onclick="this.parentElement.remove();">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Processing section - hidden when results are ready -->
+        <div id="processing-section" class="bg-white rounded-lg shadow-md p-8 mb-8 max-w-3xl mx-auto">
+            <div class="flex items-center mb-6">
+                <div class="mr-4 text-blue-500 pulse-animation">
+                    <i class="fas fa-cog fa-spin fa-2x"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-semibold text-gray-800">Processing Comparison</h2>
+                    <p class="text-gray-600 mt-1">Please wait while our AI analyzes the companies.</p>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 text-blue-700 p-5 rounded-lg mb-6">
+                <h5 class="font-semibold flex items-center mb-3"><i class="fas fa-info-circle mr-2"></i>Progress Updates</h5>
+                <div id="notification-container" class="space-y-2">
+                    <div class="p-3 bg-blue-50 text-blue-700 rounded">
+                        <i class="fas fa-circle-notch fa-spin mr-2"></i>Starting comparison process...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Results section - initially hidden, shown when results are ready -->
+        <div id="result-container" class="hidden">
+            <!-- Comparison Result -->
+            <div class="bg-white rounded-lg shadow-md">
+                <!-- Header Info -->
+                <div class="border-b border-gray-200 p-6">
+                    <h2 class="text-xl font-semibold text-gray-800">
+                        Comparison Results
+                    </h2>
+                    <div class="mt-2 text-gray-600">
+                        <span class="text-green-600 font-medium">
+                            <i class="fas fa-check-circle mr-1"></i>Analysis completed successfully
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Comparison Content -->
+                <div id="comparison-content" class="p-6 comparison-content">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
+                
+                <!-- Actions -->
+                <div class="border-t border-gray-200 p-6 flex justify-between">
+                    <a href="{% url 'compare' workspace.id %}" class="btn-secondary">
+                        <i class="fas fa-sync-alt mr-2"></i>New Comparison
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-hide message after 3 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const messagesContainer = document.getElementById('messages-container');
+            if (messagesContainer) {
+                setTimeout(function() {
+                    messagesContainer.style.transition = 'opacity 0.5s ease';
+                    messagesContainer.style.opacity = '0';
+                    setTimeout(function() {
+                        messagesContainer.style.display = 'none';
+                    }, 500);
+                }, 3000);
+            }
+            
+            // WebSocket connection for real-time updates
+            const notificationContainer = document.getElementById('notification-container');
+            const resultContainer = document.getElementById('result-container');
+            const processingSection = document.getElementById('processing-section');
+            const comparisonContent = document.getElementById('comparison-content');
+            
+            // Connect to WebSocket
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const socket = new WebSocket(`${protocol}//${window.location.host}/ws/notifications/`);
+            
+            socket.onopen = function(e) {
+                addNotification('Connected to server. Waiting for updates...', 'blue');
+            };
+            
+            socket.onmessage = function(e) {
+                const data = JSON.parse(e.data);
+                
+                if (data.type === 'notification') {
+                    addNotification(data.message.content, 'blue');
+                } else if (data.type === 'comparison_result') {
+                    // Display the comparison result
+                    comparisonContent.innerHTML = data.message;
+                    
+                    // Hide processing section and show result container
+                    processingSection.classList.add('hidden');
+                    resultContainer.classList.remove('hidden');
+                    
+                    // Add completed notification
+                    addNotification('Comparison completed! Results displayed below.', 'green');
+                    
+                    // Scroll to the results
+                    resultContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+            };
+            
+            socket.onclose = function(e) {
+                if (e.wasClean) {
+                    addNotification(`Connection closed cleanly, code=${e.code}`, 'gray');
+                } else {
+                    addNotification('Connection lost. Please refresh the page.', 'red');
+                }
+            };
+            
+            socket.onerror = function(e) {
+                addNotification('WebSocket error. Please refresh the page.', 'red');
+            };
+            
+            function addNotification(message, color) {
+                const colorClasses = {
+                    'blue': 'bg-blue-50 text-blue-700',
+                    'green': 'bg-green-50 text-green-700',
+                    'red': 'bg-red-50 text-red-700',
+                    'yellow': 'bg-yellow-50 text-yellow-700',
+                    'gray': 'bg-gray-50 text-gray-700'
+                };
+                
+                const notificationDiv = document.createElement('div');
+                notificationDiv.className = `p-3 rounded ${colorClasses[color] || colorClasses['blue']}`;
+                notificationDiv.innerHTML = message;
+                
+                notificationContainer.appendChild(notificationDiv);
+                notificationContainer.scrollTop = notificationContainer.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html> 

@@ -12,5 +12,6 @@ urlpatterns = [
 ]+ static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 websocket_urlpatterns = [
-    path('ws/notification/', NotificationConsumer.as_asgi())
+    path('ws/notification/', NotificationConsumer.as_asgi()),
+    path('ws/notifications/', NotificationConsumer.as_asgi())
 ]

@@ -63,6 +63,12 @@ class WorkspaceDeleteView(LoginRequiredMixin, View):
     def post(self, request, pk):
         workspace = get_object_or_404(Workspace, id=pk, user=request.user)
         name = workspace.name
+        
+        # First delete document chunks associated with this workspace
+        # Import here to avoid circular import
+        from apps.chatbot.models import DocumentChunk
+        DocumentChunk.objects.filter(workspace=workspace).delete()
+        
         workspace.delete()
         
         messages.success(request, f'Workspace "{name}" deleted successfully')

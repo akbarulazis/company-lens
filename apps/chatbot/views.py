@@ -7,6 +7,10 @@ from .chatbot import ChatbotRAG
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+
 # Create your views here.
 @login_required
 def chat_view(request, workspace_id):
@@ -15,6 +19,8 @@ def chat_view(request, workspace_id):
     chat_history = ChatMessage.objects.filter(workspace=workspace).order_by('created_at')
 
     companies = CompanyProfile.objects.filter(workspace=workspace)
+    
+    logger.info(f"Chat view accessed for workspace: {workspace.name} with {companies.count()} companies")
 
     context = {
         'workspace': workspace,
@@ -33,18 +39,42 @@ def chat_message(request, workspace_id):
         try:
             data = json.loads(request.body)
             message = data.get('message', '')
+            
+            logger.info(f"Chat message received: '{message[:50]}...' for workspace_id: {workspace_id}")
 
             # Initialize the chatbot
             chatbot = ChatbotRAG(workspace_id)
+
+            # Check if companies exist in this workspace
+            workspace = Workspace.objects.get(id=workspace_id)
+            companies = CompanyProfile.objects.filter(workspace=workspace)
+            if companies.count() == 0:
+                logger.warning(f"No companies found in workspace {workspace.name} for chat message")
+            else:
+                logger.info(f"Found {companies.count()} companies in workspace {workspace.name} for chat message")
+                for company in companies:
+                    logger.info(f"Company in workspace: {company.company_name}")
 
             # Save the user message
             chatbot.save_message(request.user, message)
 
             # Generate a response
             response = chatbot.generate_response(message)
+            
+            # Check if the response has the default rejection pattern
+            if "I can only provide information about" in response and "companies in the workspace" in response:
+                logger.warning("Response contains default rejection pattern despite having company data")
+                # Create a better response
+                company_names = ", ".join([company.company_name for company in companies])
+                if companies.count() > 0:
+                    response = f"""I have information about the following companies: {company_names}. 
+                    
+What specific details would you like to know about these companies? I can provide information about their industry, financial data, executives, and more."""
 
             # Save the assistant message
             chatbot.save_message(request.user, response, is_user_message=False)
+            
+            logger.info(f"Generated response: '{response[:50]}...'")
 
             return JsonResponse({
                 'status': 'success',
@@ -52,6 +82,7 @@ def chat_message(request, workspace_id):
             })
 
         except Exception as e:
+            logger.error(f"Error in chat_message: {str(e)}", exc_info=True)
             return JsonResponse({
                 'status': 'error',
                 'message': str(e)
